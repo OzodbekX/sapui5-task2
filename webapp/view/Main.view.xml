@@ -1,6 +1,7 @@
 <mvc:View
     controllerName="project1.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
     xmlns="sap.m"
 >
     <Page
@@ -11,6 +12,7 @@
             <Table
                 id="bookTable"
                 items="{bookModel>/books}"
+                mode="MultiSelect"
                 class="sapUiResponsiveMargin"
                 width="auto"
             >
@@ -19,6 +21,44 @@
                         <Title
                             id="tableTitle"
                             text="{i18n>tableTitle}"
+                        />
+                        <ToolbarSpacer id="toolbarSpacer" />
+                        <Button
+                            id="addRecordButton"
+                            text="{i18n>addRecord}"
+                            icon="sap-icon://add"
+                            type="Emphasized"
+                            press=".onAddRecord"
+                        />
+                        <Button
+                            id="deleteRecordButton"
+                            text="{i18n>deleteRecord}"
+                            icon="sap-icon://delete"
+                            type="Reject"
+                            press=".onDeleteRecord"
+                        />
+                        <ToolbarSeparator id="toolbarSeparator" />
+                        <Input
+                            id="titleFilterInput"
+                            placeholder="{i18n>filterByTitle}"
+                            width="12rem"
+                        />
+                        <Select
+                            id="genreFilterSelect"
+                            width="10rem"
+                            items="{bookModel>/genres}"
+                        >
+                            <core:Item
+                                id="genreItem"
+                                key="{bookModel>key}"
+                                text="{bookModel>text}"
+                            />
+                        </Select>
+                        <Button
+                            id="filterButton"
+                            text="{i18n>filter}"
+                            icon="sap-icon://filter"
+                            press=".onFilter"
                         />
                     </OverflowToolbar>
                 </headerToolbar>
