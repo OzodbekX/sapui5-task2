@@ -16,26 +16,89 @@
             >
                 <headerToolbar>
                     <OverflowToolbar id="tableHeaderToolbar">
-                        <Title id="tableTitle" text="{i18n>tableTitle}" />
+                        <Title
+                            id="tableTitle"
+                            text="{i18n>tableTitle}"
+                        />
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>
-                    <Column id="colId"><Text id="colIdText" text="{i18n>columnId}"/></Column>
-                    <Column id="colName"><Text id="colNameText" text="{i18n>columnName}"/></Column>
-                    <Column id="colAuthor"><Text id="colAuthorText" text="{i18n>columnAuthor}"/></Column>
-                    <Column id="colGenre"><Text id="colGenreText" text="{i18n>columnGenre}"/></Column>
-                    <Column id="colReleaseDate"><Text id="colReleaseDateText" text="{i18n>columnReleaseDate}"/></Column>
-                    <Column id="colAvailableQuantity"><Text id="colAvailableQuantityText" text="{i18n>columnAvailableQuantity}"/></Column>
+                    <Column
+                        id="colId"
+                        width="5rem"
+                    >
+                        <Text
+                            id="colIdText"
+                            text="{i18n>columnId}"
+                        />
+                    </Column>
+                    <Column id="colName">
+                        <Text
+                            id="colNameText"
+                            text="{i18n>columnName}"
+                        />
+                    </Column>
+                    <Column id="colAuthor">
+                        <Text
+                            id="colAuthorText"
+                            text="{i18n>columnAuthor}"
+                        />
+                    </Column>
+                    <Column id="colGenre">
+                        <Text
+                            id="colGenreText"
+                            text="{i18n>columnGenre}"
+                        />
+                    </Column>
+                    <Column id="colReleaseDate">
+                        <Text
+                            id="colReleaseDateText"
+                            text="{i18n>columnReleaseDate}"
+                        />
+                    </Column>
+                    <Column
+                        id="colAvailableQuantity"
+                        width="10rem"
+                        hAlign="Center"
+                    >
+                        <Text
+                            id="colAvailableQuantityText"
+                            text="{i18n>columnAvailableQuantity}"
+                        />
+                    </Column>
                 </columns>
                 <items>
                     <ColumnListItem id="bookListItem">
                         <cells>
-                            <Text id="cellIdText" text="{bookModel>ID}" />
-                            <Text id="cellNameText" text="{bookModel>Name}" />
-                            <Text id="cellAuthorText" text="{bookModel>Author}" />
-                            <Text id="cellGenreText" text="{bookModel>Genre}" />
-                            <Text id="cellReleaseDateText" text="{bookModel>ReleaseDate}" />
-                            <Text id="cellAvailableQuantityText" text="{bookModel>AvailableQuantity}" />
+                            <Text
+                                id="cellIdText"
+                                text="{bookModel>ID}"
+                            />
+                            <Text
+                                id="cellNameText"
+                                text="{bookModel>Name}"
+                            />
+                            <Text
+                                id="cellAuthorText"
+                                text="{bookModel>Author}"
+                            />
+                            <Text
+                                id="cellGenreText"
+                                text="{bookModel>Genre}"
+                            />
+                            <Text
+                                id="cellReleaseDateText"
+                                text="{
+                                    path:'bookModel>ReleaseDate',
+                                    type: 'sap.ui.model.type.Date',
+                                    formatOptions: {
+                                        style: 'medium'
+                                        }}"
+                            />
+                            <Text
+                                id="cellAvailableQuantityText"
+                                text="{bookModel>AvailableQuantity}"
+                            />
                         </cells>
                     </ColumnListItem>
                 </items>
