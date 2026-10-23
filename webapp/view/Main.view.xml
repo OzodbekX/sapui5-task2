@@ -106,6 +106,16 @@
                             text="{i18n>columnAvailableQuantity}"
                         />
                     </Column>
+                    <Column
+                        id="colActions"
+                        width="8rem"
+                        hAlign="Center"
+                    >
+                        <Text
+                            id="colActionsText"
+                            text="{i18n>columnActions}"
+                        />
+                    </Column>
                 </columns>
                 <items>
                     <ColumnListItem id="bookListItem">
@@ -114,10 +124,18 @@
                                 id="cellIdText"
                                 text="{bookModel>ID}"
                             />
-                            <Text
-                                id="cellNameText"
-                                text="{bookModel>Name}"
-                            />
+                            <VBox id="cellNameBox">
+                                <Text
+                                    id="cellNameText"
+                                    text="{bookModel>Name}"
+                                    visible="{=!${bookModel>EditMode}}"
+                                />
+                                <Input
+                                    id="cellNameInput"
+                                    value="{bookModel>Name}"
+                                    visible="{=!!${bookModel>EditMode}}"
+                                />
+                            </VBox>
                             <Text
                                 id="cellAuthorText"
                                 text="{bookModel>Author}"
@@ -139,6 +157,24 @@
                                 id="cellAvailableQuantityText"
                                 text="{bookModel>AvailableQuantity}"
                             />
+                            <HBox
+                                id="cellActionsBox"
+                                justifyContent="Center"
+                            >
+                                <Button
+                                    id="editTitleButton"
+                                    text="{i18n>editTitle}"
+                                    visible="{= !${bookModel>EditMode} }"
+                                    press=".onEditTitle"
+                                />
+                                <Button
+                                    id="saveTitleButton"
+                                    text="{i18n>save}"
+                                    type="Emphasized" 
+                                    visible="{= !!${bookModel>EditMode} }"
+                                    press=".onSaveTitle"
+                                />
+                            </HBox>
                         </cells>
                     </ColumnListItem>
                 </items>
