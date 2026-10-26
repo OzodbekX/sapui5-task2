@@ -19,6 +19,7 @@ sap.ui.define(
               Genre: "Classic",
               ReleaseDate: new Date("1925-04-10T00:00:00"),
               AvailableQuantity: 12,
+              EditMode: false,
             },
             {
               ID: "B002",
@@ -27,6 +28,7 @@ sap.ui.define(
               Genre: "Fiction",
               ReleaseDate: new Date("1960-07-11T00:00:00"),
               AvailableQuantity: 5,
+              EditMode: false,
             },
             {
               ID: "B003",
@@ -35,6 +37,7 @@ sap.ui.define(
               Genre: "Dystopian",
               ReleaseDate: new Date("1949-06-08T00:00:00"),
               AvailableQuantity: 8,
+              EditMode: false,
             },
             {
               ID: "B004",
@@ -43,6 +46,7 @@ sap.ui.define(
               Genre: "Romance",
               ReleaseDate: new Date("1813-01-28T00:00:00"),
               AvailableQuantity: 15,
+              EditMode: false,
             },
             {
               ID: "B005",
@@ -51,13 +55,14 @@ sap.ui.define(
               Genre: "Fantasy",
               ReleaseDate: new Date("1937-09-21T00:00:00"),
               AvailableQuantity: 7,
+              EditMode: false,
             },
           ],
         };
         const aGenres = [...new Set(oData.books.map((book) => book.Genre))];
-        oData.genres = [{ key: "", text: this.getResourceBundle().getText("allGenres") }].concat(
-          aGenres.map((g) => ({ key: g, text: g })),
-        );
+        oData.genres = [
+          { key: "", text: this.getResourceBundle().getText("allGenres") },
+        ].concat(aGenres.map((g) => ({ key: g, text: g })));
         this.setModel(new JSONModel(oData), "bookModel");
       },
       onAddRecord() {
@@ -77,7 +82,9 @@ sap.ui.define(
         const oTable = this.byId("bookTable");
         const aContexts = oTable.getSelectedContexts();
         if (!aContexts.length) {
-          MessageToast.show(this.getResourceBundle().getText("selectRecordToDelete"));
+          MessageToast.show(
+            this.getResourceBundle().getText("selectRecordToDelete"),
+          );
           return;
         }
         const oModel = this.getModel("bookModel");
@@ -101,6 +108,14 @@ sap.ui.define(
         }
         this.byId("bookTable").getBinding("items").filter(aFilters);
       },
+      onEditTitle(oEvent) {
+        const oContext = oEvent.getSource().getBindingContext("bookModel");
+        this.getModel("bookModel").setProperty(oContext.getPath()+"/EditMode",true);
+      },
+      onSaveTitle(oEvent){
+        const oContext=oEvent.getSource().getBindingContext("bookModel");
+        this.getModel("bookModel").setProperty(oContext.getPath()+"/EditMode",false);
+      }
     });
   },
 );
