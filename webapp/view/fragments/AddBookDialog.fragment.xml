@@ -1,0 +1,108 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+>
+    <Dialog
+        id="addBookDialog"
+        title="{i18n>addBookDialogTitle}"
+        contentWidth="35rem"
+    >
+        <content>
+            <f:SimpleForm
+                id="addBookForm"
+                editable="true"
+                layout="ResponsiveGridLayout"
+            >
+                <Label
+                    id="inputBookIdLabel"
+                    text="{i18n>columnId}"
+                    labelFor="inputBookId"
+                />
+                <Input
+                    id="inputBookId"
+                    value="{bookModel>/newBook/ID}"
+                    editable="false"
+                />
+
+                <Label
+                    id="inputBookNameLabel"
+                    text="{i18n>columnName}"
+                    labelFor="inputBookName"
+                />
+                <Input
+                    id="inputBookName"
+                    value="{bookModel>/newBook/Name}"
+                    required="true"
+                    maxLength="200"
+                />
+
+                <Label
+                    id="inputBookAuthorLabel"
+                    text="{i18n>columnAuthor}"
+                    labelFor="inputBookAuthor"
+                />
+                <Input
+                    id="inputBookAuthor"
+                    value="{bookModel>/newBook/Author}"
+                    required="true"
+                    maxLength="100"
+                />
+
+                <Label
+                    id="inputBookGenreLabel"
+                    text="{i18n>columnGenre}"
+                    labelFor="inputBookGenre"
+                />
+                <Input
+                    id="inputBookGenre"
+                    value="{bookModel>/newBook/Genre}"
+                    required="true"
+                    maxLength="50"
+                />
+
+                <Label
+                    id="inputReleaseDateLabel"
+                    text="{i18n>columnReleaseDate}"
+                    labelFor="inputBookReleaseDate"
+                />
+                <DatePicker
+                    id="inputBookReleaseDate"
+                    dateValue="{bookModel>/newBook/ReleaseDate}"
+                    valueFormat="yyyy-MM-dd"
+                    displayFormat="medium"
+                    required="true"
+                />
+
+                <Label
+                    id="inputBookQuantityLabel"
+                    text="{i18n>columnAvailableQuantity}"
+                    labelFor="inputBookQuantity"
+                />
+                <Input
+                    id="inputBookQuantity"
+                    value="{bookModel>/newBook/AvailableQuantity}"
+                    type="Number"
+                    required="true"
+                />
+            </f:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button
+                id="addBookButton"
+                text="{i18n>addButton}"
+                type="Emphasized"
+                press=".onSaveBook"
+            />
+        </beginButton>
+
+        <endButton>
+            <Button
+                id="cancelAddBookButton"
+                text="{i18n>cancelButton}"
+                press=".onCancelAddBook"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
