@@ -5,10 +5,47 @@ sap.ui.define(
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/m/MessageToast",
+    "sap/ui/core/library",
   ],
-  (BaseController, JSONModel, Filter, FilterOperator, MessageToast) => {
+  (
+    BaseController,
+    JSONModel,
+    Filter,
+    FilterOperator,
+    MessageToast,
+    coreLibrary,
+  ) => {
     "use strict";
+    const { ValueState } = coreLibrary;
+
     return BaseController.extend("project1.controller.Main", {
+      _getEmptyBook() {
+        return {
+          ID: "",
+          Name: "",
+          Author: "",
+          Genre: "",
+          ReleaseDate: null,
+          AvailableQuantity: "",
+          EditMode: false,
+        };
+      },
+      _resetValidationStates() {
+        const aInputIds = [
+          "inputBookId",
+          "inputBookName",
+          "inputBookAuthor",
+          "inputBookGenre",
+          "inputBookReleaseDate",
+          "inputBookQuantity",
+        ];
+        aInputIds.forEach((sId) => {
+          const oControl = this.byId(sId);
+          if (oControl) {
+            oControl.setValueState(ValueState.None);
+          }
+        });
+      },
       onInit() {
         const oData = {
           books: [
@@ -65,18 +102,108 @@ sap.ui.define(
         ].concat(aGenres.map((g) => ({ key: g, text: g })));
         this.setModel(new JSONModel(oData), "bookModel");
       },
-      onAddRecord() {
-        const oModel = this.getModel("bookModel");
-        const aBooks = oModel.getProperty("/books");
-        aBooks.push({
-          ID: "",
-          Name: "",
-          Author: "",
-          Genre: "",
-          ReleaseDate: null,
-          AvailableQuantity: null,
+
+      async onAddRecord() {
+        this.getModel("bookModel").setProperty(
+          "/newBook",
+          this._getEmptyBook(),
+        );
+        if (!this.oAddBookDialog) {
+          this.oAddBookDialog = await this.loadFragment({
+            name: "project1.view.fragments.AddBookDialog",
+          });
+        }
+        this._resetValidationStates();
+        this.oAddBookDialog.open();
+      },
+      onCancelAddBook() {
+        this.getModel("bookModel").setProperty(
+          "/newBook",
+          this._getEmptyBook(),
+        );
+        this._resetValidationStates();
+        this.oAddBookDialog.close();
+      },
+      _validateBookDialog() {
+        const oBundle = this.getResourceBundle();
+        const sRequiredText = oBundle.getText("requiredField");
+        let bIsValid = true;
+
+        // 1. Validate text inputs (ID, Name, Author, Genre)
+        const aTextInputIds = [
+          "inputBookId",
+          "inputBookName",
+          "inputBookAuthor",
+          "inputBookGenre",
+        ];
+        aTextInputIds.forEach((sId) => {
+          const oInput = this.byId(sId);
+          if (!oInput.getValue().trim()) {
+            oInput.setValueState(ValueState.Error);
+            oInput.setValueStateText(sRequiredText);
+            bIsValid = false;
+          } else {
+            oInput.setValueState(ValueState.None);
+          }
         });
+
+        // 2. Validate Release Date
+        const oDatePicker = this.byId("inputBookReleaseDate");
+        if (!oDatePicker.getDateValue() || !oDatePicker.isValidValue()) {
+          oDatePicker.setValueState(ValueState.Error);
+          oDatePicker.setValueStateText(sRequiredText);
+          bIsValid = false;
+        } else {
+          oDatePicker.setValueState(ValueState.None);
+        }
+
+        // 3. Validate Available Quantity (not empty, valid number >= 0)
+        const oQtyInput = this.byId("inputBookQuantity");
+        const sQty = oQtyInput.getValue().trim();
+        const nQty = Number(sQty);
+        if (sQty === "" || isNaN(nQty) || nQty < 0) {
+          oQtyInput.setValueState(ValueState.Error);
+          oQtyInput.setValueStateText(oBundle.getText("invalidQuantity"));
+          bIsValid = false;
+        } else {
+          oQtyInput.setValueState(ValueState.None);
+        }
+
+        return bIsValid;
+      },
+
+      onSaveBook() {
+        if (!this._validateBookDialog()) {
+          MessageToast.show(
+            this.getResourceBundle().getText("validationError"),
+          );
+          return;
+        }
+
+        const oModel = this.getModel("bookModel");
+        const oNewBook = oModel.getProperty("/newBook");
+        const aBooks = oModel.getProperty("/books");
+
+        aBooks.push({
+          ID: oNewBook.ID.trim(),
+          Name: oNewBook.Name.trim(),
+          Author: oNewBook.Author.trim(),
+          Genre: oNewBook.Genre.trim(),
+          ReleaseDate: oNewBook.ReleaseDate,
+          AvailableQuantity: Number(oNewBook.AvailableQuantity),
+          EditMode: false,
+        });
+
+        // Also add the genre to the filter dropdown if it's new
+        const aGenres = oModel.getProperty("/genres");
+        const sGenre = oNewBook.Genre.trim();
+        if (!aGenres.some((g) => g.key === sGenre)) {
+          aGenres.push({ key: sGenre, text: sGenre });
+          oModel.setProperty("/genres", aGenres);
+        }
+
         oModel.setProperty("/books", aBooks);
+        this.oAddBookDialog.close();
       },
       onDeleteRecord() {
         const oTable = this.byId("bookTable");
@@ -110,12 +237,18 @@ sap.ui.define(
       },
       onEditTitle(oEvent) {
         const oContext = oEvent.getSource().getBindingContext("bookModel");
-        this.getModel("bookModel").setProperty(oContext.getPath()+"/EditMode",true);
+        this.getModel("bookModel").setProperty(
+          oContext.getPath() + "/EditMode",
+          true,
+        );
       },
-      onSaveTitle(oEvent){
-        const oContext=oEvent.getSource().getBindingContext("bookModel");
-        this.getModel("bookModel").setProperty(oContext.getPath()+"/EditMode",false);
-      }
+      onSaveTitle(oEvent) {
+        const oContext = oEvent.getSource().getBindingContext("bookModel");
+        this.getModel("bookModel").setProperty(
+          oContext.getPath() + "/EditMode",
+          false,
+        );
+      },
     });
   },
 );
