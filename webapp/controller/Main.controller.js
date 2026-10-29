@@ -10,15 +10,10 @@ sap.ui.define(
     "sap/m/Text",
     "sap/m/library",
     "sap/ui/core/library",
+    "project1/model/bookData",
+    "project1/util/BookValidator",
+    "project1/util/IdGenerator",
   ],
-  (
-    BaseController,
-    JSONModel,
-    Filter,
-    FilterOperator,
-    MessageToast,
-    coreLibrary,
-  ) => {
   (
     BaseController,
     JSONModel,
@@ -29,102 +24,65 @@ sap.ui.define(
     Button,
     Text,
     mobileLibrary,
+    coreLibrary,
+    BookData,
+    BookValidator,
+    IdGenerator,
   ) => {
     "use strict";
-    const DialogType = mobileLibrary.DialogType;
-    const ButtonType = mobileLibrary.ButtonType;
+
+    const { DialogType, ButtonType } = mobileLibrary;
     const { ValueState } = coreLibrary;
+
+    const DIALOG_INPUT_IDS = [
+      "inputBookName",
+      "inputBookAuthor",
+      "inputBookGenre",
+      "inputBookReleaseDate",
+      "inputBookQuantity",
+    ];
 
     return BaseController.extend("project1.controller.Main", {
       _getEmptyBook() {
-        return {
-          ID: "",
-          Name: "",
-          Author: "",
-          Genre: "",
-          ReleaseDate: null,
-          AvailableQuantity: "",
-          EditMode: false,
-        };
+        return BookData.createEmptyBook();
       },
+
       _resetValidationStates() {
-        const aInputIds = [
-          "inputBookId",
-          "inputBookName",
-          "inputBookAuthor",
-          "inputBookGenre",
-          "inputBookReleaseDate",
-          "inputBookQuantity",
-        ];
-        aInputIds.forEach((sId) => {
-          const oControl = this.byId(sId);
-          if (oControl) {
-            oControl.setValueState(ValueState.None);
-          }
+        DIALOG_INPUT_IDS.forEach((id) => {
+          this.byId(id)?.setValueState(ValueState.None);
         });
       },
+
       onInit() {
-        const oData = {
-          books: [
-            {
-              ID: "B001",
-              Name: "The Great Gatsby",
-              Author: "F. Scott Fitzgerald",
-              Genre: "Classic",
-              ReleaseDate: new Date("1925-04-10T00:00:00"),
-              AvailableQuantity: 12,
-              EditMode: false,
-            },
-            {
-              ID: "B002",
-              Name: "To Kill a Mockingbird",
-              Author: "Harper Lee",
-              Genre: "Fiction",
-              ReleaseDate: new Date("1960-07-11T00:00:00"),
-              AvailableQuantity: 5,
-              EditMode: false,
-            },
-            {
-              ID: "B003",
-              Name: "1984",
-              Author: "George Orwell",
-              Genre: "Dystopian",
-              ReleaseDate: new Date("1949-06-08T00:00:00"),
-              AvailableQuantity: 8,
-              EditMode: false,
-            },
-            {
-              ID: "B004",
-              Name: "Pride and Prejudice",
-              Author: "Jane Austen",
-              Genre: "Romance",
-              ReleaseDate: new Date("1813-01-28T00:00:00"),
-              AvailableQuantity: 15,
-              EditMode: false,
-            },
-            {
-              ID: "B005",
-              Name: "The Hobbit",
-              Author: "J.R.R. Tolkien",
-              Genre: "Fantasy",
-              ReleaseDate: new Date("1937-09-21T00:00:00"),
-              AvailableQuantity: 7,
-              EditMode: false,
-            },
-          ],
-        };
-        const aGenres = [...new Set(oData.books.map((book) => book.Genre))];
-        oData.genres = [
-          { key: "", text: this.getResourceBundle().getText("allGenres") },
-        ].concat(aGenres.map((g) => ({ key: g, text: g })));
-        this.setModel(new JSONModel(oData), "bookModel");
+        const books = BookData.createBooks();
+        const genres = [...new Set(books.map((book) => book.Genre))];
+
+        const resourceBundle = this.getResourceBundle();
+
+        this.setModel(
+          new JSONModel({
+            books,
+            genres: [
+              {
+                key: "",
+                text: resourceBundle.getText("allGenres"),
+              },
+              ...genres.map((genre) => ({
+                key: genre,
+                text: genre,
+              })),
+            ],
+          }),
+          "bookModel",
+        );
       },
 
       async onAddRecord() {
-        this.getModel("bookModel").setProperty(
-          "/newBook",
-          this._getEmptyBook(),
-        );
+        const model = this.getModel("bookModel");
+        const newBook = this._getEmptyBook();
+        newBook.ID = IdGenerator.generateNextId(model.getProperty("/books"));
+        model.setProperty("/newBook", newBook);
+
         if (!this.oAddBookDialog) {
           this.oAddBookDialog = await this.loadFragment({
             name: "project1.view.fragments.AddBookDialog",
@@ -133,6 +91,7 @@ sap.ui.define(
         this._resetValidationStates();
         this.oAddBookDialog.open();
       },
+
       onCancelAddBook() {
         this.getModel("bookModel").setProperty(
           "/newBook",
@@ -141,52 +100,22 @@ sap.ui.define(
         this._resetValidationStates();
         this.oAddBookDialog.close();
       },
-      _validateBookDialog() {
-        const oBundle = this.getResourceBundle();
-        const sRequiredText = oBundle.getText("requiredField");
-        let bIsValid = true;
 
-        // 1. Validate text inputs (ID, Name, Author, Genre)
-        const aTextInputIds = [
-          "inputBookId",
+      _validateBookDialog() {
+        const bundle = this.getResourceBundle();
+        const textInputs = [
           "inputBookName",
           "inputBookAuthor",
           "inputBookGenre",
-        ];
-        aTextInputIds.forEach((sId) => {
-          const oInput = this.byId(sId);
-          if (!oInput.getValue().trim()) {
-            oInput.setValueState(ValueState.Error);
-            oInput.setValueStateText(sRequiredText);
-            bIsValid = false;
-          } else {
-            oInput.setValueState(ValueState.None);
-          }
+        ].map((id) => this.byId(id));
+
+        return BookValidator.validateBookDialog({
+          textInputs,
+          datePicker: this.byId("inputBookReleaseDate"),
+          quantityInput: this.byId("inputBookQuantity"),
+          requiredText: bundle.getText("requiredField"),
+          invalidQuantityText: bundle.getText("invalidQuantity"),
         });
-
-        // 2. Validate Release Date
-        const oDatePicker = this.byId("inputBookReleaseDate");
-        if (!oDatePicker.getDateValue() || !oDatePicker.isValidValue()) {
-          oDatePicker.setValueState(ValueState.Error);
-          oDatePicker.setValueStateText(sRequiredText);
-          bIsValid = false;
-        } else {
-          oDatePicker.setValueState(ValueState.None);
-        }
-
-        // 3. Validate Available Quantity (not empty, valid number >= 0)
-        const oQtyInput = this.byId("inputBookQuantity");
-        const sQty = oQtyInput.getValue().trim();
-        const nQty = Number(sQty);
-        if (sQty === "" || isNaN(nQty) || nQty < 0) {
-          oQtyInput.setValueState(ValueState.Error);
-          oQtyInput.setValueStateText(oBundle.getText("invalidQuantity"));
-          bIsValid = false;
-        } else {
-          oQtyInput.setValueState(ValueState.None);
-        }
-
-        return bIsValid;
       },
 
       onSaveBook() {
@@ -197,98 +126,101 @@ sap.ui.define(
           return;
         }
 
-        const oModel = this.getModel("bookModel");
-        const oNewBook = oModel.getProperty("/newBook");
-        const aBooks = oModel.getProperty("/books");
+        const model = this.getModel("bookModel");
+        const newBook = model.getProperty("/newBook");
+        const books = model.getProperty("/books");
+        const genre = newBook.Genre.trim();
 
-        aBooks.push({
-          ID: oNewBook.ID.trim(),
-          Name: oNewBook.Name.trim(),
-          Author: oNewBook.Author.trim(),
-          Genre: oNewBook.Genre.trim(),
-          ReleaseDate: oNewBook.ReleaseDate,
-          AvailableQuantity: Number(oNewBook.AvailableQuantity),
+        books.push({
+          ID: newBook.ID,
+          Name: newBook.Name.trim(),
+          Author: newBook.Author.trim(),
+          Genre: genre,
+          ReleaseDate: newBook.ReleaseDate,
+          AvailableQuantity: Number(newBook.AvailableQuantity),
           EditMode: false,
         });
 
-        // Also add the genre to the filter dropdown if it's new
-        const aGenres = oModel.getProperty("/genres");
-        const sGenre = oNewBook.Genre.trim();
-        if (!aGenres.some((g) => g.key === sGenre)) {
-          aGenres.push({ key: sGenre, text: sGenre });
-          oModel.setProperty("/genres", aGenres);
+        const genres = model.getProperty("/genres");
+        if (!genres.some((g) => g.key === genre)) {
+          genres.push({ key: genre, text: genre });
+          model.setProperty("/genres", genres);
         }
 
-        oModel.setProperty("/books", aBooks);
+        model.setProperty("/books", books);
         this.oAddBookDialog.close();
       },
-      onDeleteRecord() {
-        const oTable = this.byId("bookTable");
-        const aContexts = oTable.getSelectedContexts();
-        const oBundle = this.getResourceBundle();
 
-        if (!aContexts.length) {
-          MessageToast.show(oBundle.getText("selectRecordToDelete"));
+      onDeleteRecord() {
+        const table = this.byId("bookTable");
+        const bundle = this.getResourceBundle();
+
+        if (!table.getSelectedContexts().length) {
+          MessageToast.show(bundle.getText("selectRecordToDelete"));
           return;
         }
 
         if (!this.oApproveDialog) {
           this.oApproveDialog = new Dialog({
             type: DialogType.Message,
-            title: oBundle.getText("confirmTitle"),
+            title: bundle.getText("confirmTitle"),
             content: new Text({
-              text: oBundle.getText("confirmDeleteText"),
+              text: bundle.getText("confirmDeleteText"),
             }),
             beginButton: new Button({
               type: ButtonType.Emphasized,
-              text: oBundle.getText("yes"),
+              text: bundle.getText("yes"),
               press: () => {
-                const oModel = this.getModel("bookModel");
-                const aBooks = oModel.getProperty("/books");
-                oTable
+                const model = this.getModel("bookModel");
+                const books = model.getProperty("/books");
+                table
                   .getSelectedContexts()
-                  .map((oCtx) => Number(oCtx.getPath().split("/").pop()))
+                  .map((ctx) => Number(ctx.getPath().split("/").pop()))
                   .sort((a, b) => b - a)
-                  .forEach((i) => aBooks.splice(i, 1));
-                oModel.setProperty("/books", aBooks);
-                oTable.removeSelections(true);
+                  .forEach((i) => books.splice(i, 1));
+                model.setProperty("/books", books);
+                table.removeSelections(true);
                 this.oApproveDialog.close();
               },
             }),
             endButton: new Button({
-              text: oBundle.getText("no"),
+              text: bundle.getText("no"),
               press: () => {
                 this.oApproveDialog.close();
               },
             }),
           });
+          this.getView().addDependent(this.oApproveDialog);
         }
 
         this.oApproveDialog.open();
       },
+
       onFilter() {
-        const sTitle = this.byId("titleFilterInput").getValue();
-        const sGenre = this.byId("genreFilterSelect").getSelectedKey();
-        const aFilters = [];
-        if (sTitle) {
-          aFilters.push(new Filter("Name", FilterOperator.Contains, sTitle));
+        const title = this.byId("titleFilterInput").getValue();
+        const genre = this.byId("genreFilterSelect").getSelectedKey();
+        const filters = [];
+        if (title) {
+          filters.push(new Filter("Name", FilterOperator.Contains, title));
         }
-        if (sGenre) {
-          aFilters.push(new Filter("Genre", FilterOperator.EQ, sGenre));
+        if (genre) {
+          filters.push(new Filter("Genre", FilterOperator.EQ, genre));
         }
-        this.byId("bookTable").getBinding("items").filter(aFilters);
+        this.byId("bookTable").getBinding("items").filter(filters);
       },
-      onEditTitle(oEvent) {
-        const oContext = oEvent.getSource().getBindingContext("bookModel");
+
+      onEditTitle(event) {
+        const context = event.getSource().getBindingContext("bookModel");
         this.getModel("bookModel").setProperty(
-          oContext.getPath() + "/EditMode",
+          context.getPath() + "/EditMode",
           true,
         );
       },
-      onSaveTitle(oEvent) {
-        const oContext = oEvent.getSource().getBindingContext("bookModel");
+
+      onSaveTitle(event) {
+        const context = event.getSource().getBindingContext("bookModel");
         this.getModel("bookModel").setProperty(
-          oContext.getPath() + "/EditMode",
+          context.getPath() + "/EditMode",
           false,
         );
       },

@@ -22,8 +22,7 @@
                 <Input
                     id="inputBookId"
                     value="{bookModel>/newBook/ID}"
-                    required="true"
-                    maxLength="20"
+                    editable="false"
                 />
 
                 <Label
