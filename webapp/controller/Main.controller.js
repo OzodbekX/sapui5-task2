@@ -5,6 +5,10 @@ sap.ui.define(
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/m/MessageToast",
+    "sap/m/Dialog",
+    "sap/m/Button",
+    "sap/m/Text",
+    "sap/m/library",
     "sap/ui/core/library",
   ],
   (
@@ -15,7 +19,20 @@ sap.ui.define(
     MessageToast,
     coreLibrary,
   ) => {
+  (
+    BaseController,
+    JSONModel,
+    Filter,
+    FilterOperator,
+    MessageToast,
+    Dialog,
+    Button,
+    Text,
+    mobileLibrary,
+  ) => {
     "use strict";
+    const DialogType = mobileLibrary.DialogType;
+    const ButtonType = mobileLibrary.ButtonType;
     const { ValueState } = coreLibrary;
 
     return BaseController.extend("project1.controller.Main", {
@@ -208,20 +225,46 @@ sap.ui.define(
       onDeleteRecord() {
         const oTable = this.byId("bookTable");
         const aContexts = oTable.getSelectedContexts();
+        const oBundle = this.getResourceBundle();
+
         if (!aContexts.length) {
-          MessageToast.show(
-            this.getResourceBundle().getText("selectRecordToDelete"),
-          );
+          MessageToast.show(oBundle.getText("selectRecordToDelete"));
           return;
         }
-        const oModel = this.getModel("bookModel");
-        const aBooks = oModel.getProperty("/books");
-        aContexts
-          .map((oCtx) => Number(oCtx.getPath().split("/").pop()))
-          .sort((a, b) => b - a)
-          .forEach((i) => aBooks.splice(i, 1));
-        oModel.setProperty("/books", aBooks);
-        oTable.removeSelections(true);
+
+        if (!this.oApproveDialog) {
+          this.oApproveDialog = new Dialog({
+            type: DialogType.Message,
+            title: oBundle.getText("confirmTitle"),
+            content: new Text({
+              text: oBundle.getText("confirmDeleteText"),
+            }),
+            beginButton: new Button({
+              type: ButtonType.Emphasized,
+              text: oBundle.getText("yes"),
+              press: () => {
+                const oModel = this.getModel("bookModel");
+                const aBooks = oModel.getProperty("/books");
+                oTable
+                  .getSelectedContexts()
+                  .map((oCtx) => Number(oCtx.getPath().split("/").pop()))
+                  .sort((a, b) => b - a)
+                  .forEach((i) => aBooks.splice(i, 1));
+                oModel.setProperty("/books", aBooks);
+                oTable.removeSelections(true);
+                this.oApproveDialog.close();
+              },
+            }),
+            endButton: new Button({
+              text: oBundle.getText("no"),
+              press: () => {
+                this.oApproveDialog.close();
+              },
+            }),
+          });
+        }
+
+        this.oApproveDialog.open();
       },
       onFilter() {
         const sTitle = this.byId("titleFilterInput").getValue();
