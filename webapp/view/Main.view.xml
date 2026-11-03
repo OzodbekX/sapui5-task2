@@ -147,12 +147,11 @@
                             <Text
                                 id="cellReleaseDateText"
                                 text="{
-                                    path:'bookModel>ReleaseDate',
-                                    type: 'sap.ui.model.type.Date',
-                                    formatOptions: {
-                                        style: 'medium'
-                                        }}"
+                                    parts: ['i18n>publishedYear', 'bookModel>ReleaseDate'],
+                                    formatter: '.formatter.publishedYear'
+                                }"  
                             />
+
                             <Text
                                 id="cellAvailableQuantityText"
                                 text="{bookModel>AvailableQuantity}"
@@ -170,7 +169,7 @@
                                 <Button
                                     id="saveTitleButton"
                                     text="{i18n>save}"
-                                    type="Emphasized" 
+                                    type="Emphasized"
                                     visible="{= !!${bookModel>EditMode} }"
                                     press=".onSaveTitle"
                                 />

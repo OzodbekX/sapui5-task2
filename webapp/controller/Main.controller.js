@@ -13,6 +13,7 @@ sap.ui.define(
     "project1/model/bookData",
     "project1/util/BookValidator",
     "project1/util/IdGenerator",
+    "project1/model/formatter",
   ],
   (
     BaseController,
@@ -28,6 +29,7 @@ sap.ui.define(
     BookData,
     BookValidator,
     IdGenerator,
+    formatter,
   ) => {
     "use strict";
 
@@ -43,6 +45,7 @@ sap.ui.define(
     ];
 
     return BaseController.extend("project1.controller.Main", {
+      formatter,
       _getEmptyBook() {
         return BookData.createEmptyBook();
       },
