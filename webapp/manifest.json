@@ -15,7 +15,7 @@
       "version": "1.33.0",
       "toolsId": "f38d7de4-4587-4f38-a391-c721d5ae5611"
     },
-     "dataSources": {
+    "dataSources": {
       "mainServiceV2": {
         "uri": "/V2/OData/OData.svc/",
         "type": "OData",
@@ -72,21 +72,23 @@
           "bundleName": "project1.i18n.i18n"
         }
       },
-      "odataV2":{
+      "odataV2": {
+        "type": "sap.ui.model.odata.v2.ODataModel",
         "dataSource": "mainServiceV2",
         "preload": true,
         "settings": {}
       },
-      "odataV4":{
+      "odataV4": {
+        "type": "sap.ui.model.odata.v4.ODataModel",
         "dataSource": "mainServiceV4",
         "preload": true,
         "settings": {
+          "synchronizationMode": "None",
           "operationMode": "Server",
           "earlyRequests": true
         }
       }
     },
-   
     "resources": {
       "css": [
         {

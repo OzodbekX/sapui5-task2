@@ -26,6 +26,20 @@ server:
       configuration:
         flp:
           theme: sap_horizon
+    - name: sap-fe-mockserver
+      beforeMiddleware: csp
+      configuration:
+        mountPath: /
+        services:
+          - urlPath: /V2/OData/OData.svc
+            metadataPath: ./webapp/localService/metadataV2.xml
+            mockdataPath: ./webapp/localService/data
+            generateMockData: true
+          - urlPath: /V4/OData/OData.svc
+            metadataPath: ./webapp/localService/metadataV4.xml
+            mockdataPath: ./webapp/localService/data
+            generateMockData: true
+        annotations: []
 builder:
   resources:
     excludes:
