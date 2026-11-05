@@ -1,0 +1,119 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Table
+        id="odataV2Table"
+        items="{odataV2>/Products}"
+        class="sapUiResponsiveMargin"
+        width="auto"
+        growing="true"
+        growingThreshold="20"
+    >
+        <headerToolbar>
+            <OverflowToolbar id="v2Toolbar">
+                <Title
+                    id="v2Title"
+                    text="{i18n>productsTableTitle}"
+                />
+            </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+            <Column id="v2ColId">
+                <Text
+                    id="v2ColIdText"
+                    text="{i18n>columnId}"
+                />
+            </Column>
+            <Column id="v2ColName">
+                <Text
+                    id="v2ColNameText"
+                    text="{i18n>columnProductName}"
+                />
+            </Column>
+            <Column id="v2ColDesc">
+                <Text
+                    id="v2ColDescText"
+                    text="{i18n>columnDescription}"
+                />
+            </Column>
+            <Column id="v2ColRelDate">
+                <Text
+                    id="v2ColRelDateText"
+                    text="{i18n>columnReleaseDate}"
+                />
+            </Column>
+            <Column id="v2ColDiscDate">
+                <Text
+                    id="v2ColDiscDateText"
+                    text="{i18n>columnDiscontinuedDate}"
+                />
+            </Column>
+            <Column id="v2ColRating">
+                <Text
+                    id="v2ColRatingText"
+                    text="{i18n>columnRating}"
+                />
+            </Column>
+            <Column id="v2ColPrice">
+                <Text
+                    id="v2ColPriceText"
+                    text="{i18n>columnPrice}"
+                />
+            </Column>
+        </columns>
+        <items>
+            <ColumnListItem id="v2ListItem">
+                <cells>
+                    <Text
+                        id="v2CellId"
+                        text="{odataV2>ID}"
+                    />
+                    <Text
+                        id="v2CellName"
+                        text="{odataV2>Name}"
+                    />
+                    <Text
+                        id="v2CellDesc"
+                        text="{odataV2>Description}"
+                    />
+                    <Text
+                        id="v2CellRelDate"
+                        text="{
+                            path: 'odataV2>ReleaseDate',
+                            type: 'sap.ui.model.type.Date',
+                            formatOptions: {
+                                style: 'medium'
+                            }
+                        }"
+                    />
+                    <Text
+                        id="v2CellDiscDate"
+                        text="{
+                            path: 'odataV2>DiscontinuedDate',
+                            type: 'sap.ui.model.type.Date',
+                            formatOptions: {
+                                style: 'medium'
+                            }
+                        }"
+                    />
+                    <Text
+                        id="v2CellRating"
+                        text="{odataV2>Rating}"
+                    />
+                    <Text
+                        id="v2CellPrice"
+                        text="{
+                            path: 'odataV2>Price',
+                            type: 'sap.ui.model.type.Float',
+                            formatOptions: {
+                                minFractionDigits: 2,
+                                maxFractionDigits: 2
+                            }
+                        }"
+                    />
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</core:FragmentDefinition>
