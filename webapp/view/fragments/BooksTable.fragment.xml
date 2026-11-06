@@ -6,6 +6,8 @@
         id="bookTable"
         items="{bookModel>/books}"
         mode="MultiSelect"
+        growing="true"
+        growingThreshold="50"
         class="sapUiResponsiveMargin"
         width="auto"
     >
@@ -35,11 +37,14 @@
                     id="titleFilterInput"
                     placeholder="{i18n>filterByTitle}"
                     width="12rem"
+                    liveChange=".onFilterLiveChange"
+                    change=".onFilter"
                 />
                 <Select
                     id="genreFilterSelect"
                     width="10rem"
                     items="{bookModel>/genres}"
+                    change=".onFilter"
                 >
                     <core:Item
                         id="genreItem"
