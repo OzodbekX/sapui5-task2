@@ -5,6 +5,7 @@ sap.ui.define(
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/m/MessageToast",
+    "sap/m/MessageBox",
     "sap/m/Dialog",
     "sap/m/Button",
     "sap/m/Text",
@@ -21,6 +22,7 @@ sap.ui.define(
     Filter,
     FilterOperator,
     MessageToast,
+    MessageBox,
     Dialog,
     Button,
     Text,
@@ -93,6 +95,61 @@ sap.ui.define(
         }
         this._resetValidationStates();
         this.oAddBookDialog.open();
+      },
+
+      onDeleteV2Products() {
+        const table = this.byId("odataV2Table");
+        const contexts = table.getSelectedContexts();
+        const bundle = this.getResourceBundle();
+
+        if (!contexts.length) {
+          MessageToast.show(bundle.getText("selectRecordToDelete"));
+          return;
+        }
+
+        const model = this.getModel("odataV2");
+        const groupId = "deleteProducts";
+
+        const deferred = model.getDeferredGroups();
+        if (!deferred.includes(groupId)) {
+          model.setDeferredGroups([...deferred, groupId]);
+        }
+
+        contexts.forEach((ctx) => model.remove(ctx.getPath(), { groupId }));
+
+        model.submitChanges({
+          groupId,
+          success: (data) => {
+            const failed = (data?.__batchResponses || []).filter(
+              (r) => r.response && Number(r.response.statusCode) >= 400,
+            );
+            if (failed.length) {
+              MessageBox.error(
+                bundle.getText("deleteError", [
+                  this._getODataErrorText(failed[0].response),
+                ]),
+              );
+              return;
+            }
+            table.removeSelections(true);
+            MessageToast.show(
+              bundle.getText("deleteSuccess", [contexts.length]),
+            );
+          },
+          error: (err) => {
+            MessageBox.error(
+              bundle.getText("deleteError", [this._getODataErrorText(err)]),
+            );
+          },
+        });
+      },
+
+      _getODataErrorText(err) {
+        try {
+          return JSON.parse(err.responseText || err.body).error.message.value;
+        } catch (e) {
+          return err.message || err.statusText || "";
+        }
       },
 
       onCancelAddBook() {
