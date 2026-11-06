@@ -9,175 +9,53 @@
         title="{i18n>title}"
     >
         <content>
-            <Table
-                id="bookTable"
-                items="{bookModel>/books}"
-                mode="MultiSelect"
-                class="sapUiResponsiveMargin"
-                width="auto"
+            <IconTabBar
+                id="mainIconTabBar"
+                expandable="false"
+                selectedKey="json"
             >
-                <headerToolbar>
-                    <OverflowToolbar id="tableHeaderToolbar">
-                        <Title
-                            id="tableTitle"
-                            text="{i18n>tableTitle}"
-                        />
-                        <ToolbarSpacer id="toolbarSpacer" />
-                        <Button
-                            id="addRecordButton"
-                            text="{i18n>addRecord}"
-                            icon="sap-icon://add"
-                            type="Emphasized"
-                            press=".onAddRecord"
-                        />
-                        <Button
-                            id="deleteRecordButton"
-                            text="{i18n>deleteRecord}"
-                            icon="sap-icon://delete"
-                            type="Reject"
-                            press=".onDeleteRecord"
-                        />
-                        <ToolbarSeparator id="toolbarSeparator" />
-                        <Input
-                            id="titleFilterInput"
-                            placeholder="{i18n>filterByTitle}"
-                            width="12rem"
-                        />
-                        <Select
-                            id="genreFilterSelect"
-                            width="10rem"
-                            items="{bookModel>/genres}"
-                        >
-                            <core:Item
-                                id="genreItem"
-                                key="{bookModel>key}"
-                                text="{bookModel>text}"
-                            />
-                        </Select>
-                        <Button
-                            id="filterButton"
-                            text="{i18n>filter}"
-                            icon="sap-icon://filter"
-                            press=".onFilter"
-                        />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <columns>
-                    <Column
-                        id="colId"
-                        width="5rem"
-                    >
-                        <Text
-                            id="colIdText"
-                            text="{i18n>columnId}"
-                        />
-                    </Column>
-                    <Column id="colName">
-                        <Text
-                            id="colNameText"
-                            text="{i18n>columnName}"
-                        />
-                    </Column>
-                    <Column id="colAuthor">
-                        <Text
-                            id="colAuthorText"
-                            text="{i18n>columnAuthor}"
-                        />
-                    </Column>
-                    <Column id="colGenre">
-                        <Text
-                            id="colGenreText"
-                            text="{i18n>columnGenre}"
-                        />
-                    </Column>
-                    <Column id="colReleaseDate">
-                        <Text
-                            id="colReleaseDateText"
-                            text="{i18n>columnReleaseDate}"
-                        />
-                    </Column>
-                    <Column
-                        id="colAvailableQuantity"
-                        width="10rem"
-                        hAlign="Center"
-                    >
-                        <Text
-                            id="colAvailableQuantityText"
-                            text="{i18n>columnAvailableQuantity}"
-                        />
-                    </Column>
-                    <Column
-                        id="colActions"
-                        width="8rem"
-                        hAlign="Center"
-                    >
-                        <Text
-                            id="colActionsText"
-                            text="{i18n>columnActions}"
-                        />
-                    </Column>
-                </columns>
                 <items>
-                    <ColumnListItem id="bookListItem">
-                        <cells>
-                            <Text
-                                id="cellIdText"
-                                text="{bookModel>ID}"
+                    <IconTabFilter
+                        id="jsonTab"
+                        key="json"
+                        text="{i18n>tabJsonModel}"
+                        icon="sap-icon://table-view"
+                    >
+                        <content>
+                            <core:Fragment
+                                fragmentName="project1.view.fragments.BooksTable"
+                                type="XML"
                             />
-                            <VBox id="cellNameBox">
-                                <Text
-                                    id="cellNameText"
-                                    text="{bookModel>Name}"
-                                    visible="{=!${bookModel>EditMode}}"
-                                />
-                                <Input
-                                    id="cellNameInput"
-                                    value="{bookModel>Name}"
-                                    visible="{=!!${bookModel>EditMode}}"
-                                />
-                            </VBox>
-                            <Text
-                                id="cellAuthorText"
-                                text="{bookModel>Author}"
+                        </content>
+                    </IconTabFilter>
+                    <IconTabFilter
+                        id="odataV2Tab"
+                        key="odataV2"
+                        text="{i18n>tabODataV2Model}"
+                        icon="sap-icon://database"
+                    >
+                        <content>
+                            <core:Fragment
+                                fragmentName="project1.view.fragments.ODataV2ProductsTable"
+                                type="XML"
                             />
-                            <Text
-                                id="cellGenreText"
-                                text="{bookModel>Genre}"
+                        </content>
+                    </IconTabFilter>
+                    <IconTabFilter
+                        id="odataV4Tab"
+                        key="odataV4"
+                        text="{i18n>tabODataV4Model}"
+                        icon="sap-icon://cloud"
+                    >
+                        <content>
+                            <core:Fragment
+                                fragmentName="project1.view.fragments.ODataV4ProductsTable"
+                                type="XML"
                             />
-                            <Text
-                                id="cellReleaseDateText"
-                                text="{
-                                    parts: ['i18n>publishedYear', 'bookModel>ReleaseDate'],
-                                    formatter: '.formatter.publishedYear'
-                                }"  
-                            />
-
-                            <Text
-                                id="cellAvailableQuantityText"
-                                text="{bookModel>AvailableQuantity}"
-                            />
-                            <HBox
-                                id="cellActionsBox"
-                                justifyContent="Center"
-                            >
-                                <Button
-                                    id="editTitleButton"
-                                    text="{i18n>editTitle}"
-                                    visible="{= !${bookModel>EditMode} }"
-                                    press=".onEditTitle"
-                                />
-                                <Button
-                                    id="saveTitleButton"
-                                    text="{i18n>save}"
-                                    type="Emphasized"
-                                    visible="{= !!${bookModel>EditMode} }"
-                                    press=".onSaveTitle"
-                                />
-                            </HBox>
-                        </cells>
-                    </ColumnListItem>
+                        </content>
+                    </IconTabFilter>
                 </items>
-            </Table>
+            </IconTabBar>
         </content>
     </Page>
 </mvc:View>

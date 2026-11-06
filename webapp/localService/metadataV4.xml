@@ -140,11 +140,11 @@
 <Annotation Term="Org.OData.Publication.V1.Keywords" String="Inventory, Supplier, Advertisers, Sales, Finance"/>
 <Annotation Term="Org.OData.Publication.V1.AttributionUrl" String="http://www.odata.org/"/>
 <Annotation Term="Org.OData.Publication.V1.AttributionDescription" String="All rights reserved"/>
-<Annotation Term="Org.OData.Publication.V1.DocumentationUrl " String="http://www.odata.org/"/>
+<Annotation Term="Org.OData.Publication.V1.DocumentationUrl" String="http://www.odata.org/"/>
 <Annotation Term="Org.OData.Publication.V1.TermsOfUseUrl" String="All rights reserved"/>
 <Annotation Term="Org.OData.Publication.V1.PrivacyPolicyUrl" String="http://www.odata.org/"/>
 <Annotation Term="Org.OData.Publication.V1.LastModified" String="4/2/2013"/>
-<Annotation Term="Org.OData.Publication.V1.ImageUrl " String="http://www.odata.org/"/>
+<Annotation Term="Org.OData.Publication.V1.ImageUrl" String="http://www.odata.org/"/>
 </Annotations>
 </Schema>
 </edmx:DataServices>
