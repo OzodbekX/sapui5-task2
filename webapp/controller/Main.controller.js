@@ -35,11 +35,24 @@ sap.ui.define(
     const FILTER_DEBOUNCE_MS = 300;
     const MODEL_SIZE_LIMIT = 1000;
 
-    const TEXT_INPUT_IDS = ["inputBookName", "inputBookAuthor", "inputBookGenre"];
+    const TEXT_INPUT_IDS = [
+      "inputBookName",
+      "inputBookAuthor",
+      "inputBookGenre",
+    ];
     const DIALOG_INPUT_IDS = [
       ...TEXT_INPUT_IDS,
       "inputBookReleaseDate",
       "inputBookQuantity",
+    ];
+
+    const V2_TEXT_INPUT_IDS = ["v2InputName", "v2InputDesc"];
+    const V2_NUMBER_INPUT_IDS = ["v2InputId", "v2InputRating", "v2InputPrice"];
+    const V2_DATE_INPUT_IDS = ["v2InputRelDate", "v2InputDiscDate"];
+    const V2_DIALOG_INPUT_IDS = [
+      ...V2_TEXT_INPUT_IDS,
+      ...V2_NUMBER_INPUT_IDS,
+      ...V2_DATE_INPUT_IDS,
     ];
 
     const indexFromContext = (ctx) => Number(ctx.getPath().split("/").pop());
@@ -68,6 +81,129 @@ sap.ui.define(
         clearTimeout(this._filterTimer);
       },
 
+      _loadAddProductV2Dialog() {
+        if (!this._pAddProductV2Dialog) {
+          this._pAddProductV2Dialog = this.loadFragment({
+            name: "project1.view.fragments.AddProductV2Dialog",
+          });
+        }
+        return this._pAddProductV2Dialog;
+      },
+      _resetV2Dialog() {
+        V2_DIALOG_INPUT_IDS.forEach((id) => {
+          const control = this.byId(id);
+          if (control) {
+            control.setDateValue?.(null);
+            control.setValue("");
+            control.setValueState(ValueState.None);
+            control.setValueStateText("");
+          }
+        });
+      },
+
+      async onAddV2Product() {
+        const dialog = await this._loadAddProductV2Dialog();
+        this._resetV2Dialog();
+        dialog.open();
+      },
+      async onCancelV2Product() {
+        this._resetV2Dialog();
+        (await this._loadAddProductV2Dialog()).close();
+      },
+      onV2InputLiveChange(event) {
+        const input = event.getSource();
+        const bundle = this.getResourceBundle();
+        if (input.getValue().trim()) {
+          input.setValueState(ValueState.None);
+          input.setValueStateText("");
+        } else {
+          input.setValueState(ValueState.Error);
+          input.setValueStateText(bundle.getText("requiredField"));
+        }
+      },
+      onV2DateChange(event) {
+        const picker = event.getSource();
+        const bundle = this.getResourceBundle();
+        if (picker.getDateValue() && picker.isValidValue()) {
+          picker.setValueState(ValueState.None);
+          picker.setValueStateText("");
+        } else {
+          picker.setValueState(ValueState.Error);
+          picker.setValueStateText(bundle.getText("requiredField"));
+        }
+      },
+      _validateV2ProductDialog() {
+        const bundle = this.getResourceBundle();
+        const requiredText = bundle.getText("requiredField");
+        const invalidNumberText = bundle.getText("invalidNumber");
+        let isValid = true;
+        V2_TEXT_INPUT_IDS.forEach((id) => {
+          const input = this.byId(id);
+          if (!input.getValue().trim()) {
+            input.setValueState(ValueState.Error);
+            input.setValueStateText(requiredText);
+            isValid = false;
+          } else {
+            input.setValueState(ValueState.None);
+          }
+        });
+        V2_NUMBER_INPUT_IDS.forEach((id) => {
+          const input = this.byId(id);
+          const raw = input.getValue().trim();
+          const num = Number(raw);
+          if (raw === "") {
+            input.setValueState(ValueState.Error);
+            input.setValueStateText(requiredText);
+            isValid = false;
+          } else if (!Number.isFinite(num) || num < 0) {
+            input.setValueState(ValueState.Error);
+            input.setValueStateText(invalidNumberText);
+            isValid = false;
+          } else {
+            input.setValueState(ValueState.None);
+          }
+        });
+        V2_DATE_INPUT_IDS.forEach((id) => {
+          const picker = this.byId(id);
+          if (!picker.getDateValue() || !picker.isValidValue()) {
+            picker.setValueState(ValueState.Error);
+            picker.setValueStateText(requiredText);
+            isValid = false;
+          } else {
+            picker.setValueState(ValueState.None);
+          }
+        });
+        return isValid;
+      },
+      async onSaveV2Product() {
+        const bundle = this.getResourceBundle();
+        if (!this._validateV2ProductDialog()) {
+          return;
+        }
+        const newProduct = {
+          ID: parseInt(this.byId("v2InputId").getValue().trim(), 10),
+          Name: this.byId("v2InputName").getValue().trim(),
+          Description: this.byId("v2InputDesc").getValue().trim(),
+          ReleaseDate: this.byId("v2InputRelDate").getDateValue(),
+          DiscontinuedDate: this.byId("v2InputDiscDate").getDateValue(),
+          Rating: parseInt(this.byId("v2InputRating").getValue().trim(), 10),
+          Price: Number(this.byId("v2InputPrice").getValue().trim()),
+        };
+        const dialog = await this._loadAddProductV2Dialog();
+        const model = this.getModel(ODATA_MODEL);
+        model.create("/Products", newProduct, {
+          success: () => {
+            dialog.close();
+            this._resetV2Dialog();
+            MessageToast.show(bundle.getText("createSuccess"));
+          },
+          error: (err) => {
+            MessageBox.error(
+              bundle.getText("createError", [this._getODataErrorText(err)]),
+            );
+          },
+        });
+      },
       _getEmptyBook() {
         return BookData.createEmptyBook();
       },
@@ -126,7 +262,9 @@ sap.ui.define(
 
       async onSaveBook() {
         if (!this._validateBookDialog()) {
-          MessageToast.show(this.getResourceBundle().getText("validationError"));
+          MessageToast.show(
+            this.getResourceBundle().getText("validationError"),
+          );
           return;
         }
 
@@ -148,7 +286,10 @@ sap.ui.define(
 
         const genres = model.getProperty("/genres");
         if (!genres.some((g) => g.key === genre)) {
-          model.setProperty("/genres", [...genres, { key: genre, text: genre }]);
+          model.setProperty("/genres", [
+            ...genres,
+            { key: genre, text: genre },
+          ]);
         }
 
         (await this._loadAddBookDialog()).close();
@@ -201,7 +342,9 @@ sap.ui.define(
           model.setDeferredGroups([...deferred, DELETE_GROUP_ID]);
         }
 
-        paths.forEach((path) => model.remove(path, { groupId: DELETE_GROUP_ID }));
+        paths.forEach((path) =>
+          model.remove(path, { groupId: DELETE_GROUP_ID }),
+        );
 
         const discardPending = () => model.resetChanges(paths, true);
 
@@ -221,7 +364,9 @@ sap.ui.define(
               return;
             }
             table.removeSelections(true);
-            MessageToast.show(bundle.getText("deleteSuccess", [contexts.length]));
+            MessageToast.show(
+              bundle.getText("deleteSuccess", [contexts.length]),
+            );
           },
           error: (err) => {
             discardPending();
@@ -261,7 +406,10 @@ sap.ui.define(
 
       _setEditMode(event, value) {
         const context = event.getSource().getBindingContext(BOOK_MODEL);
-        this.getModel(BOOK_MODEL).setProperty(`${context.getPath()}/EditMode`, value);
+        this.getModel(BOOK_MODEL).setProperty(
+          `${context.getPath()}/EditMode`,
+          value,
+        );
       },
 
       onEditTitle(event) {
