@@ -1,0 +1,118 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+>
+    <Dialog
+        id="addProductV2Dialog"
+        title="{i18n>addProductDialogTitle}"
+        contentWidth="35rem"
+    >
+        <content>
+            <f:SimpleForm
+                id="addProductV2Form"
+                editable="true"
+                layout="ResponsiveGridLayout"
+            >
+                <Label
+                    id="v2InputIdLabel"
+                    text="{i18n>columnId}"
+                    labelFor="v2InputId"
+                />
+                <Input
+                    id="v2InputId"
+                    type="Number"
+                    required="true"
+                    liveChange=".onV2InputLiveChange"
+                />
+
+                <Label
+                    id="v2InputNameLabel"
+                    text="{i18n>columnProductName}"
+                    labelFor="v2InputName"
+                />
+                <Input
+                    id="v2InputName"
+                    required="true"
+                    liveChange=".onV2InputLiveChange"
+                />
+
+                <Label
+                    id="v2InputDescLabel"
+                    text="{i18n>columnDescription}"
+                    labelFor="v2InputDesc"
+                />
+                <Input
+                    id="v2InputDesc"
+                    required="true"
+                    liveChange=".onV2InputLiveChange"
+                />
+
+                <Label
+                    id="v2InputRelDateLabel"
+                    text="{i18n>columnReleaseDate}"
+                    labelFor="v2InputRelDate"
+                />
+                <DatePicker
+                    id="v2InputRelDate"
+                    displayFormat="medium"
+                    required="true"
+                    change=".onV2DateChange"
+                />
+
+                <Label
+                    id="v2InputDiscDateLabel"
+                    text="{i18n>columnDiscontinuedDate}"
+                    labelFor="v2InputDiscDate"
+                />
+                <DatePicker
+                    id="v2InputDiscDate"
+                    displayFormat="medium"
+                    required="true"
+                    change=".onV2DateChange"
+                />
+
+                <Label
+                    id="v2InputRatingLabel"
+                    text="{i18n>columnRating}"
+                    labelFor="v2InputRating"
+                />
+                <Input
+                    id="v2InputRating"
+                    type="Number"
+                    required="true"
+                    liveChange=".onV2InputLiveChange"
+                />
+
+                <Label
+                    id="v2InputPriceLabel"
+                    text="{i18n>columnPrice}"
+                    labelFor="v2InputPrice"
+                />
+                <Input
+                    id="v2InputPrice"
+                    type="Number"
+                    required="true"
+                    liveChange=".onV2InputLiveChange"
+                />
+            </f:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button
+                id="saveV2ProductButton"
+                text="{i18n>saveButton}"
+                type="Emphasized"
+                press=".onSaveV2Product"
+            />
+        </beginButton>
+
+        <endButton>
+            <Button
+                id="cancelV2ProductButton"
+                text="{i18n>cancelButton}"
+                press=".onCancelV2Product"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

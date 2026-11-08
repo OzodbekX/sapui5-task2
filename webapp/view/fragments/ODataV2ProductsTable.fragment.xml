@@ -19,6 +19,13 @@
                 />
                 <ToolbarSpacer id="v2ToolbarSpacer" />
                 <Button
+                    id="v2AddButton"
+                    text="{i18n>addRecord}"
+                    icon="sap-icon://add"
+                    type="Emphasized"
+                    press=".onAddV2Product"
+                />
+                <Button
                     id="v2DeleteButton"
                     text="{i18n>deleteButtonText}"
                     icon="sap-icon://delete"
