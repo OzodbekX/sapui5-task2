@@ -2,14 +2,14 @@
 
 sap.ui.define(
   [
-    "project1/controller/Main.controller",
+    "project1/controller/BooksTab.controller",
     "sap/ui/model/json/JSONModel",
     "sap/ui/thirdparty/sinon",
   ],
   function (Controller, JSONModel, sinon) {
     "use strict";
 
-    QUnit.module("Main Controller", {
+    QUnit.module("BooksTab Controller", {
       beforeEach: function () {
         this.oBookModel = new JSONModel({
           books: [
@@ -31,13 +31,11 @@ sap.ui.define(
 
         this.oController = new Controller();
         this.oController.getResourceBundle = () => ({ getText: (sKey) => sKey });
-        this.oController.getOwnerComponent = () => ({ getModel: () => new JSONModel({}) });
         this.oController.getView = () => ({
           setModel: this.oSetModelSpy,
           getModel: () => this.oBookModel,
         });
         this.oController.byId = (sId) => this.oControls[sId];
-        this.oController.getModel = () => this.oBookModel;
         this.oController.loadFragment = () => Promise.resolve(this.oDialogStub);
       },
     });
@@ -51,9 +49,10 @@ sap.ui.define(
       };
     }
 
-    QUnit.test("onInit should run without errors", function (assert) {
+    QUnit.test("onInit should create the book model", function (assert) {
       this.oController.onInit();
-      assert.ok(this.oController, "onInit ran without throwing");
+      assert.ok(this.oSetModelSpy.calledOnce, "setModel was called once");
+      assert.strictEqual(this.oSetModelSpy.firstCall.args[1], "bookModel", "model is named bookModel");
     });
 
     QUnit.test("onEditTitle should switch the row to edit mode", function (assert) {
@@ -88,7 +87,7 @@ sap.ui.define(
         ReleaseDate: "1951-05-01",
         AvailableQuantity: 4,
       });
-      this.oController._validateBookDialog = () => true;
+      this.oController._validateDialog = () => true;
 
       await this.oController.onSaveBook();
 
@@ -111,4 +110,3 @@ sap.ui.define(
     });
   },
 );
-

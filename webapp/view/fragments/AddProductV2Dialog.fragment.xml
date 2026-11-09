@@ -68,7 +68,6 @@
                 <DatePicker
                     id="v2InputDiscDate"
                     displayFormat="medium"
-                    required="true"
                     change=".onV2DateChange"
                 />
 
