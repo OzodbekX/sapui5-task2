@@ -90,14 +90,50 @@ sap.ui.define(
         };
       },
 
+      _setDialogMode(dialog, editPath) {
+        this._editPath = editPath;
+        this.byId("v2InputId").setEditable(!editPath);
+        dialog.setTitle(
+          this.getResourceBundle().getText(
+            editPath ? "editProductDialogTitle" : "addProductDialogTitle",
+          ),
+        );
+      },
+
+      _fillDialog(product) {
+        this.byId("v2InputId").setValue(String(product.ID));
+        this.byId("v2InputName").setValue(product.Name);
+        this.byId("v2InputDesc").setValue(product.Description);
+        this.byId(RELEASE_DATE_ID).setDateValue(product.ReleaseDate || null);
+        // The mock server serializes a null DiscontinuedDate as /Date(0)/.
+        const discontinued = product.DiscontinuedDate;
+        this.byId(DISCONTINUED_DATE_ID).setDateValue(
+          discontinued && discontinued.getTime() !== 0 ? discontinued : null,
+        );
+        this.byId("v2InputRating").setValue(String(product.Rating ?? ""));
+        this.byId("v2InputPrice").setValue(String(product.Price ?? ""));
+      },
+
       async onAddV2Product() {
         const dialog = await this._loadDialog();
         this._resetDialog();
+        this._setDialogMode(dialog, null);
+        dialog.open();
+      },
+
+      async onEditV2Product(event) {
+        const ctx = event.getSource().getBindingContext(ODATA_MODEL);
+        const dialog = await this._loadDialog();
+        this._resetDialog();
+        this._setDialogMode(dialog, ctx.getPath());
+        this._fillDialog(ctx.getObject());
         dialog.open();
       },
 
       async onCancelV2Product() {
+        // Inputs are not bound to the model, so closing discards any edits.
         this._resetDialog();
+        this._editPath = null;
         (await this._loadDialog()).close();
       },
 
@@ -114,26 +150,38 @@ sap.ui.define(
           return;
         }
         const bundle = this.getResourceBundle();
-        const newProduct = this._readProduct();
+        const product = this._readProduct();
         const dialog = await this._loadDialog();
         if (dialog.getBusy()) {
           return;
         }
-        dialog.setBusy(true);
-        this.getModel(ODATA_MODEL).create("/Products", newProduct, {
+        const model = this.getModel(ODATA_MODEL);
+        const editPath = this._editPath;
+        const handlers = {
           success: () => {
             dialog.setBusy(false);
             dialog.close();
             this._resetDialog();
-            MessageToast.show(bundle.getText("createSuccess"));
+            this._editPath = null;
+            MessageToast.show(
+              bundle.getText(editPath ? "updateSuccess" : "createSuccess"),
+            );
           },
           error: (err) => {
             dialog.setBusy(false);
             MessageBox.error(
-              bundle.getText("createError", [this.getODataErrorText(err)]),
+              bundle.getText(editPath ? "updateError" : "createError", [
+                this.getODataErrorText(err),
+              ]),
             );
           },
-        });
+        };
+        dialog.setBusy(true);
+        if (editPath) {
+          model.update(editPath, product, handlers);
+        } else {
+          model.create("/Products", product, handlers);
+        }
       },
 
       onDeleteV2Products() {

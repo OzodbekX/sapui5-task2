@@ -78,6 +78,15 @@
                     text="{i18n>columnPrice}"
                 />
             </Column>
+            <Column
+                id="v2ColActions"
+                hAlign="End"
+            >
+                <Text
+                    id="v2ColActionsText"
+                    text="{i18n>columnActions}"
+                />
+            </Column>
         </columns>
         <items>
             <ColumnListItem id="v2ListItem">
@@ -128,6 +137,12 @@
                                 maxFractionDigits: 2
                             }
                         }"
+                    />
+                    <Button
+                        id="v2EditButton"
+                        text="{i18n>editButton}"
+                        icon="sap-icon://edit"
+                        press=".onEditV2Product"
                     />
                 </cells>
             </ColumnListItem>
