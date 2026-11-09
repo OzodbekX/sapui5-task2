@@ -1,7 +1,5 @@
 <mvc:View
-    controllerName="project1.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:core="sap.ui.core"
     xmlns="sap.m"
 >
     <Page
@@ -22,9 +20,9 @@
                         icon="sap-icon://table-view"
                     >
                         <content>
-                            <core:Fragment
-                                fragmentName="project1.view.fragments.BooksTable"
-                                type="XML"
+                            <mvc:XMLView
+                                id="booksTabView"
+                                viewName="project1.view.BooksTab"
                             />
                         </content>
                     </IconTabFilter>
@@ -35,9 +33,9 @@
                         icon="sap-icon://database"
                     >
                         <content>
-                            <core:Fragment
-                                fragmentName="project1.view.fragments.ODataV2ProductsTable"
-                                type="XML"
+                            <mvc:XMLView
+                                id="productsV2TabView"
+                                viewName="project1.view.ProductsV2Tab"
                             />
                         </content>
                     </IconTabFilter>
@@ -48,9 +46,9 @@
                         icon="sap-icon://cloud"
                     >
                         <content>
-                            <core:Fragment
-                                fragmentName="project1.view.fragments.ODataV4ProductsTable"
-                                type="XML"
+                            <mvc:XMLView
+                                id="productsV4TabView"
+                                viewName="project1.view.ProductsV4Tab"
                             />
                         </content>
                     </IconTabFilter>
