@@ -1,6 +1,7 @@
-<core:FragmentDefinition
+<mvc:View
+    controllerName="project1.controller.ProductsV4Tab"
+    xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:core="sap.ui.core"
 >
     <Table
         id="odataV4Table"
@@ -116,4 +117,4 @@
             </ColumnListItem>
         </items>
     </Table>
-</core:FragmentDefinition>
+</mvc:View>
