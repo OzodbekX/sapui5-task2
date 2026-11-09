@@ -19,6 +19,12 @@
                     text="{i18n>productsTableTitle}"
                 />
                 <ToolbarSpacer id="v2ToolbarSpacer" />
+                <Input
+                    id="v2ProductNameFilterInput"
+                    placeholder="{i18n>filterByProductName}"
+                    width="15rem"
+                    liveChange=".onFilterV2Products"
+                />
                 <Button
                     id="v2AddButton"
                     text="{i18n>addRecord}"

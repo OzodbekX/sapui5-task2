@@ -5,15 +5,29 @@ sap.ui.define(
     "sap/m/MessageBox",
     "sap/ui/core/library",
     "project1/util/ProductValidator",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
   ],
-  (BaseController, MessageToast, MessageBox, coreLibrary, ProductValidator) => {
+  (
+    BaseController,
+    MessageToast,
+    MessageBox,
+    coreLibrary,
+    ProductValidator,
+    Filter,
+    FilterOperator,
+  ) => {
     "use strict";
 
     const { ValueState } = coreLibrary;
 
     const ODATA_MODEL = "odataV2";
     const DELETE_GROUP_ID = "deleteProducts";
+    const FILTER_DEBOUNCE_MS = 300;
 
+  
+
+  
     const TEXT_INPUT_IDS = ["v2InputName", "v2InputDesc"];
     const NUMBER_INPUT_IDS = ["v2InputId", "v2InputRating", "v2InputPrice"];
     const INTEGER_INPUT_IDS = ["v2InputId", "v2InputRating"];
@@ -88,6 +102,20 @@ sap.ui.define(
           Rating: Number(this._getValue("v2InputRating")),
           Price: Number(this._getValue("v2InputPrice")).toFixed(2),
         };
+      },
+      _applyProductFilter(query) {
+        const filters = [];
+        if (query) {
+          filters.push(
+            new Filter({
+              path: "Name",
+              operator: FilterOperator.Contains,
+              value1: query,
+              caseSensitive: false,
+            }),
+          );
+        }
+        this.byId("odataV2Table").getBinding("items").filter(filters);
       },
 
       _setDialogMode(dialog, editPath) {
@@ -233,6 +261,18 @@ sap.ui.define(
             showError(err);
           },
         });
+      },
+      onExit() {
+        clearTimeout(this._filterTimer);
+      },
+
+      onFilterV2Products(event) {
+        const query = (event.getParameter("value") ?? "").trim();
+        clearTimeout(this._filterTimer);
+         // eslint-disable-next-line @sap-ux/fiori-tools/sap-timeout-usage
+        this._filterTimer = setTimeout(() => {
+          this._applyProductFilter(query);
+        }, FILTER_DEBOUNCE_MS);
       },
     });
   },
