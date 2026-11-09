@@ -5,6 +5,7 @@
     <Table
         id="odataV2Table"
         items="{odataV2>/Products}"
+        mode="MultiSelect"
         class="sapUiResponsiveMargin"
         width="auto"
         growing="true"
@@ -15,6 +16,14 @@
                 <Title
                     id="v2Title"
                     text="{i18n>productsTableTitle}"
+                />
+                <ToolbarSpacer id="v2ToolbarSpacer" />
+                <Button
+                    id="v2DeleteButton"
+                    text="{i18n>deleteButtonText}"
+                    icon="sap-icon://delete"
+                    type="Reject"
+                    press=".onDeleteV2Products"
                 />
             </OverflowToolbar>
         </headerToolbar>
