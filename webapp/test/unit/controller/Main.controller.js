@@ -5,7 +5,6 @@ sap.ui.define(
     "project1/controller/Main.controller",
     "sap/ui/model/json/JSONModel",
     "sap/ui/thirdparty/sinon",
-    "sap/ui/thirdparty/sinon-qunit",
   ],
   function (Controller, JSONModel, sinon) {
     "use strict";
@@ -22,6 +21,7 @@ sap.ui.define(
 
         this.oSetModelSpy = sinon.spy();
         this.oFilterSpy = sinon.spy();
+        this.oDialogStub = { open: sinon.spy(), close: sinon.spy() };
 
         this.oControls = {
           titleFilterInput: { getValue: () => "" },
@@ -38,6 +38,7 @@ sap.ui.define(
         });
         this.oController.byId = (sId) => this.oControls[sId];
         this.oController.getModel = () => this.oBookModel;
+        this.oController.loadFragment = () => Promise.resolve(this.oDialogStub);
       },
     });
 
@@ -70,12 +71,29 @@ sap.ui.define(
       assert.strictEqual(this.oBookModel.getProperty("/books/0/EditMode"), false, "row 0 left edit mode");
     });
 
-    QUnit.test("onAddRecord should add a record to the model", function (assert) {
-      var iBefore = this.oBookModel.getProperty("/books").length;
+    QUnit.test("onAddRecord should initialize newBook and open the dialog", async function (assert) {
+      await this.oController.onAddRecord();
 
-      this.oController.onAddRecord();
+      assert.strictEqual(this.oBookModel.getProperty("/newBook/ID"), "B003", "next ID was generated on /newBook");
+      assert.ok(this.oDialogStub.open.calledOnce, "dialog.open was called once");
+    });
+
+    QUnit.test("onSaveBook should add a valid record to the model", async function (assert) {
+      var iBefore = this.oBookModel.getProperty("/books").length;
+      this.oBookModel.setProperty("/newBook", {
+        ID: "B003",
+        Name: "Foundation",
+        Author: "Isaac Asimov",
+        Genre: "SciFi",
+        ReleaseDate: "1951-05-01",
+        AvailableQuantity: 4,
+      });
+      this.oController._validateBookDialog = () => true;
+
+      await this.oController.onSaveBook();
 
       assert.strictEqual(this.oBookModel.getProperty("/books").length, iBefore + 1, "one record was added");
+      assert.ok(this.oDialogStub.close.calledOnce, "dialog.close was called once");
     });
 
     QUnit.test("onFilter should apply a filter to the table binding", function (assert) {
