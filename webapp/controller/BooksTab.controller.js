@@ -8,9 +8,9 @@ sap.ui.define(
     "sap/m/MessageBox",
     "sap/ui/core/library",
     "project1/model/bookData",
+    "project1/model/formatter",
     "project1/util/BookValidator",
     "project1/util/IdGenerator",
-    "project1/model/formatter",
   ],
   (
     BaseController,
@@ -21,21 +21,23 @@ sap.ui.define(
     MessageBox,
     coreLibrary,
     BookData,
+    formatter,
     BookValidator,
     IdGenerator,
-    formatter,
   ) => {
     "use strict";
 
     const { ValueState } = coreLibrary;
 
     const BOOK_MODEL = "bookModel";
-    const ODATA_MODEL = "odataV2";
-    const DELETE_GROUP_ID = "deleteProducts";
-    const FILTER_DEBOUNCE_MS = 300;
     const MODEL_SIZE_LIMIT = 1000;
+    const FILTER_DEBOUNCE_MS = 300;
 
-    const TEXT_INPUT_IDS = ["inputBookName", "inputBookAuthor", "inputBookGenre"];
+    const TEXT_INPUT_IDS = [
+      "inputBookName",
+      "inputBookAuthor",
+      "inputBookGenre",
+    ];
     const DIALOG_INPUT_IDS = [
       ...TEXT_INPUT_IDS,
       "inputBookReleaseDate",
@@ -44,7 +46,7 @@ sap.ui.define(
 
     const indexFromContext = (ctx) => Number(ctx.getPath().split("/").pop());
 
-    return BaseController.extend("project1.controller.Main", {
+    return BaseController.extend("project1.controller.BooksTab", {
       formatter,
 
       onInit() {
@@ -68,8 +70,13 @@ sap.ui.define(
         clearTimeout(this._filterTimer);
       },
 
-      _getEmptyBook() {
-        return BookData.createEmptyBook();
+      _loadDialog() {
+        if (!this._pDialog) {
+          this._pDialog = this.loadFragment({
+            name: "project1.view.fragments.AddBookDialog",
+          });
+        }
+        return this._pDialog;
       },
 
       _resetValidationStates() {
@@ -78,43 +85,8 @@ sap.ui.define(
         });
       },
 
-      _getODataErrorText(err) {
-        try {
-          return JSON.parse(err.responseText || err.body).error.message.value;
-        } catch (e) {
-          return err.message || err.statusText || "";
-        }
-      },
-
-      _loadAddBookDialog() {
-        if (!this._pAddBookDialog) {
-          this._pAddBookDialog = this.loadFragment({
-            name: "project1.view.fragments.AddBookDialog",
-          });
-        }
-        return this._pAddBookDialog;
-      },
-
-      async onAddRecord() {
-        const model = this.getModel(BOOK_MODEL);
-        const newBook = this._getEmptyBook();
-        newBook.ID = IdGenerator.generateNextId(model.getProperty("/books"));
-        model.setProperty("/newBook", newBook);
-
-        const dialog = await this._loadAddBookDialog();
-        this._resetValidationStates();
-        dialog.open();
-      },
-
-      async onCancelAddBook() {
-        this.getModel(BOOK_MODEL).setProperty("/newBook", this._getEmptyBook());
-        this._resetValidationStates();
-        (await this._loadAddBookDialog()).close();
-      },
-
-      _validateBookDialog() {
+      _validateDialog() {
         const bundle = this.getResourceBundle();
-
         return BookValidator.validateBookDialog({
           textInputs: TEXT_INPUT_IDS.map((id) => this.byId(id)),
           datePicker: this.byId("inputBookReleaseDate"),
@@ -124,9 +96,31 @@ sap.ui.define(
         });
       },
 
+      async onAddRecord() {
+        const model = this.getModel(BOOK_MODEL);
+        const newBook = BookData.createEmptyBook();
+        newBook.ID = IdGenerator.generateNextId(model.getProperty("/books"));
+        model.setProperty("/newBook", newBook);
+
+        const dialog = await this._loadDialog();
+        this._resetValidationStates();
+        dialog.open();
+      },
+
+      async onCancelAddBook() {
+        this.getModel(BOOK_MODEL).setProperty(
+          "/newBook",
+          BookData.createEmptyBook(),
+        );
+        this._resetValidationStates();
+        (await this._loadDialog()).close();
+      },
+
       async onSaveBook() {
-        if (!this._validateBookDialog()) {
-          MessageToast.show(this.getResourceBundle().getText("validationError"));
+        if (!this._validateDialog()) {
+          MessageToast.show(
+            this.getResourceBundle().getText("validationError"),
+          );
           return;
         }
 
@@ -148,10 +142,13 @@ sap.ui.define(
 
         const genres = model.getProperty("/genres");
         if (!genres.some((g) => g.key === genre)) {
-          model.setProperty("/genres", [...genres, { key: genre, text: genre }]);
+          model.setProperty("/genres", [
+            ...genres,
+            { key: genre, text: genre },
+          ]);
         }
 
-        (await this._loadAddBookDialog()).close();
+        (await this._loadDialog()).close();
       },
 
       onDeleteRecord() {
@@ -179,55 +176,6 @@ sap.ui.define(
               model.getProperty("/books").filter((_, i) => !toRemove.has(i)),
             );
             table.removeSelections(true);
-          },
-        });
-      },
-
-      onDeleteV2Products() {
-        const table = this.byId("odataV2Table");
-        const contexts = table.getSelectedContexts();
-        const bundle = this.getResourceBundle();
-
-        if (!contexts.length) {
-          MessageToast.show(bundle.getText("selectRecordToDelete"));
-          return;
-        }
-
-        const model = this.getModel(ODATA_MODEL);
-        const paths = contexts.map((ctx) => ctx.getPath());
-
-        const deferred = model.getDeferredGroups();
-        if (!deferred.includes(DELETE_GROUP_ID)) {
-          model.setDeferredGroups([...deferred, DELETE_GROUP_ID]);
-        }
-
-        paths.forEach((path) => model.remove(path, { groupId: DELETE_GROUP_ID }));
-
-        const discardPending = () => model.resetChanges(paths, true);
-
-        model.submitChanges({
-          groupId: DELETE_GROUP_ID,
-          success: (data) => {
-            const failed = (data?.__batchResponses || []).filter(
-              (r) => r.response && Number(r.response.statusCode) >= 400,
-            );
-            if (failed.length) {
-              discardPending();
-              MessageBox.error(
-                bundle.getText("deleteError", [
-                  this._getODataErrorText(failed[0].response),
-                ]),
-              );
-              return;
-            }
-            table.removeSelections(true);
-            MessageToast.show(bundle.getText("deleteSuccess", [contexts.length]));
-          },
-          error: (err) => {
-            discardPending();
-            MessageBox.error(
-              bundle.getText("deleteError", [this._getODataErrorText(err)]),
-            );
           },
         });
       },
@@ -261,7 +209,10 @@ sap.ui.define(
 
       _setEditMode(event, value) {
         const context = event.getSource().getBindingContext(BOOK_MODEL);
-        this.getModel(BOOK_MODEL).setProperty(`${context.getPath()}/EditMode`, value);
+        this.getModel(BOOK_MODEL).setProperty(
+          `${context.getPath()}/EditMode`,
+          value,
+        );
       },
 
       onEditTitle(event) {
