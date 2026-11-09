@@ -159,7 +159,6 @@ sap.ui.define(
       },
 
       async onCancelV2Product() {
-        // Inputs are not bound to the model, so closing discards any edits.
         this._resetDialog();
         this._editPath = null;
         (await this._loadDialog()).close();
