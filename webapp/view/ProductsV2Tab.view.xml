@@ -23,7 +23,7 @@
                     id="v2ProductNameFilterInput"
                     placeholder="{i18n>filterByProductName}"
                     width="15rem"
-                    liveChange=".onFilterV2Products"
+                    submit=".onFilterV2Products"
                 />
                 <Button
                     id="v2AddButton"
