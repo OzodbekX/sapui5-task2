@@ -25,7 +25,6 @@ sap.ui.define(
 
     const ODATA_MODEL = "odataV2";
     const DELETE_GROUP_ID = "deleteProducts";
-    const FILTER_DEBOUNCE_MS = 300;
 
     const TEXT_INPUT_IDS = ["v2InputName", "v2InputDesc"];
     const NUMBER_INPUT_IDS = ["v2InputId", "v2InputRating", "v2InputPrice"];
@@ -260,17 +259,9 @@ sap.ui.define(
           },
         });
       },
-      onExit() {
-        clearTimeout(this._filterTimer);
-      },
-
       onFilterV2Products(event) {
         const query = (event.getParameter("value") ?? "").trim();
-        clearTimeout(this._filterTimer);
-        // eslint-disable-next-line @sap-ux/fiori-tools/sap-timeout-usage
-        this._filterTimer = setTimeout(() => {
-          this._applyProductFilter(query);
-        }, FILTER_DEBOUNCE_MS);
+        this._applyProductFilter(query);
       },
       onSortV2Products(event) {
         const selectedItem = event.getParameter("selectedItem");
