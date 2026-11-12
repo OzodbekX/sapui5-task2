@@ -5,8 +5,20 @@ sap.ui.define(
     "sap/m/MessageBox",
     "sap/ui/core/library",
     "project1/util/ProductValidator",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
   ],
-  (BaseController, MessageToast, MessageBox, coreLibrary, ProductValidator) => {
+  (
+    BaseController,
+    MessageToast,
+    MessageBox,
+    coreLibrary,
+    ProductValidator,
+    Filter,
+    FilterOperator,
+    Sorter,
+  ) => {
     "use strict";
 
     const { ValueState } = coreLibrary;
@@ -27,9 +39,6 @@ sap.ui.define(
     ];
 
     return BaseController.extend("project1.controller.ProductsV2Tab", {
-      _getValue(id) {
-        return this.byId(id).getValue().trim();
-      },
 
       _getTexts() {
         const bundle = this.getResourceBundle();
@@ -57,8 +66,6 @@ sap.ui.define(
         DIALOG_INPUT_IDS.forEach((id) => {
           const control = this.byId(id);
           if (control) {
-            control.setDateValue?.(null);
-            control.setValue("");
             control.setValueState(ValueState.None);
             control.setValueStateText("");
           }
@@ -77,28 +84,73 @@ sap.ui.define(
         });
       },
 
-      _readProduct() {
-        return {
-          ID: Number(this._getValue("v2InputId")),
-          Name: this._getValue("v2InputName"),
-          Description: this._getValue("v2InputDesc"),
-          ReleaseDate: this.byId(RELEASE_DATE_ID).getDateValue(),
-          DiscontinuedDate:
-            this.byId(DISCONTINUED_DATE_ID).getDateValue() || null,
-          Rating: Number(this._getValue("v2InputRating")),
-          Price: Number(this._getValue("v2InputPrice")).toFixed(2),
-        };
+      _applyProductFilter(query) {
+        const filters = [];
+        if (query) {
+          filters.push(
+            new Filter({
+              path: "Name",
+              operator: FilterOperator.Contains,
+              value1: query,
+              caseSensitive: false,
+            }),
+          );
+        }
+        this.byId("odataV2Table").getBinding("items").filter(filters);
+      },
+
+      _setDialogMode(dialog, editPath) {
+        this._editPath = editPath;
+        this.byId("v2InputId").setEditable(!editPath);
+        dialog.setTitle(
+          this.getResourceBundle().getText(
+            editPath ? "editProductDialogTitle" : "addProductDialogTitle",
+          ),
+        );
       },
 
       async onAddV2Product() {
         const dialog = await this._loadDialog();
         this._resetDialog();
+        this._setDialogMode(dialog, null);
+        const model = this.getModel(ODATA_MODEL);
+        this._oCtx = model.createEntry("/Products", {
+          properties: {
+            ID: null,
+            Name: "",
+            Description: "",
+            ReleaseDate: null,
+            DiscontinuedDate: null,
+            Rating: null,
+            Price: null,
+          },
+        });
+        dialog.setBindingContext(this._oCtx, ODATA_MODEL);
+        dialog.open();
+      },
+
+      async onEditV2Product(event) {
+        const ctx = event.getSource().getBindingContext(ODATA_MODEL);
+        const dialog = await this._loadDialog();
+        this._resetDialog();
+        this._setDialogMode(dialog, ctx.getPath());
+        dialog.setBindingContext(ctx, ODATA_MODEL);
         dialog.open();
       },
 
       async onCancelV2Product() {
+        const dialog = await this._loadDialog();
+        const model = this.getModel(ODATA_MODEL);
+        if (this._oCtx) {
+          model.deleteCreatedEntry(this._oCtx);
+          this._oCtx = null;
+        }else if (this._editPath) {
+          model.resetChanges([this._editPath], true);
+        }
+        this._editPath = null;
+        dialog.setBindingContext(null, ODATA_MODEL);
         this._resetDialog();
-        (await this._loadDialog()).close();
+        dialog.close();
       },
 
       onV2InputLiveChange(event) {
@@ -113,29 +165,51 @@ sap.ui.define(
         if (!this._validateDialog()) {
           return;
         }
-        const bundle = this.getResourceBundle();
-        const newProduct = this._readProduct();
         const dialog = await this._loadDialog();
         if (dialog.getBusy()) {
           return;
         }
+        const model = this.getModel(ODATA_MODEL);
+        if (!model.hasPendingChanges()) {
+          dialog.close();
+          return;
+        }
+
+        const bundle = this.getResourceBundle();
+        const editPath = this._editPath;
+        const showError = (err) =>
+          MessageBox.error(
+            bundle.getText(editPath ? "updateError" : "createError", [
+              this.getODataErrorText(err),
+            ]),
+          );
+
         dialog.setBusy(true);
-        this.getModel(ODATA_MODEL).create("/Products", newProduct, {
-          success: () => {
+        model.submitChanges({
+          success: (data) => {
             dialog.setBusy(false);
+            const failed = (data?.__batchResponses || []).filter(
+              (r) => r.response && Number(r.response.statusCode) >= 400,
+            );
+            if (failed.length) {
+              showError(failed[0].response);
+              return;
+            }
+            this._oCtx = null;
+            this._editPath = null;
+            dialog.setBindingContext(null, ODATA_MODEL);
             dialog.close();
             this._resetDialog();
-            MessageToast.show(bundle.getText("createSuccess"));
+            MessageToast.show(
+              bundle.getText(editPath ? "updateSuccess" : "createSuccess"),
+            );
           },
           error: (err) => {
             dialog.setBusy(false);
-            MessageBox.error(
-              bundle.getText("createError", [this.getODataErrorText(err)]),
-            );
+            showError(err);
           },
         });
       },
-
       onDeleteV2Products() {
         const table = this.byId("odataV2Table");
         const contexts = table.getSelectedContexts();
@@ -185,6 +259,19 @@ sap.ui.define(
             showError(err);
           },
         });
+      },
+      onFilterV2Products(event) {
+        const query = (event.getParameter("value") ?? "").trim();
+        this._applyProductFilter(query);
+      },
+      onSortV2Products(event) {
+        const selectedItem = event.getParameter("selectedItem");
+        const columnKey = selectedItem.getKey();
+        const sorters = [];
+        if (columnKey) {
+          sorters.push(new Sorter(columnKey, true));
+        }
+        this.byId("odataV2Table").getBinding("items").sort(sorters);
       },
     });
   },
