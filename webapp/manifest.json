@@ -113,6 +113,11 @@
           "name": "RouteMain",
           "pattern": ":?query:",
           "target": ["TargetMain"]
+        },
+        {
+          "name":"RouteTab",
+          "pattern":"tab/{tabKey}",
+          "target":["TargetMain"]
         }
       ],
       "targets": {
