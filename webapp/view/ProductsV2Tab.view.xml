@@ -2,6 +2,7 @@
     controllerName="project1.controller.ProductsV2Tab"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:core="sap.ui.core"
 >
     <Table
         id="odataV2Table"
@@ -25,6 +26,48 @@
                     width="15rem"
                     submit=".onFilterV2Products"
                 />
+                <ComboBox
+                    id="v2SortComboBox"
+                    placeholder="{i18n>selectColumnPlaceholder}"
+                    width="15rem"
+                    selectionChange=".onSortV2Products"
+                >
+                    <core:Item
+                        id="v2SortItemId"
+                        text="{i18n>columnId}"
+                        key="ID"
+                    />
+                    <core:Item
+                        id="v2SortItemName"
+                        text="{i18n>columnProductName}"
+                        key="Name"
+                    />
+                    <core:Item
+                        id="v2SortItemDesc"
+                        text="{i18n>columnDescription}"
+                        key="Description"
+                    />
+                    <core:Item
+                        id="v2SortItemRelDate"
+                        text="{i18n>columnReleaseDate}"
+                        key="ReleaseDate"
+                    />
+                    <core:Item
+                        id="v2SortItemDiscDate"
+                        text="{i18n>columnDiscontinuedDate}"
+                        key="DiscontinuedDate"
+                    />
+                    <core:Item
+                        id="v2SortItemRating"
+                        text="{i18n>columnRating}"
+                        key="Rating"
+                    />
+                    <core:Item
+                        id="v2SortItemPrice"
+                        text="{i18n>columnPrice}"
+                        key="Price"
+                    />
+                </ComboBox>
                 <Button
                     id="v2AddButton"
                     text="{i18n>addRecord}"

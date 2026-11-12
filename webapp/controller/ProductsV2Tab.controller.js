@@ -7,6 +7,7 @@ sap.ui.define(
     "project1/util/ProductValidator",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter",
   ],
   (
     BaseController,
@@ -16,6 +17,7 @@ sap.ui.define(
     ProductValidator,
     Filter,
     FilterOperator,
+    Sorter,
   ) => {
     "use strict";
 
@@ -24,9 +26,6 @@ sap.ui.define(
     const ODATA_MODEL = "odataV2";
     const DELETE_GROUP_ID = "deleteProducts";
 
-  
-
-  
     const TEXT_INPUT_IDS = ["v2InputName", "v2InputDesc"];
     const NUMBER_INPUT_IDS = ["v2InputId", "v2InputRating", "v2InputPrice"];
     const INTEGER_INPUT_IDS = ["v2InputId", "v2InputRating"];
@@ -263,6 +262,15 @@ sap.ui.define(
       onFilterV2Products(event) {
         const query = (event.getParameter("value") ?? "").trim();
         this._applyProductFilter(query);
+      },
+      onSortV2Products(event) {
+        const selectedItem = event.getParameter("selectedItem");
+        const columnKey = selectedItem.getKey();
+        const sorters = [];
+        if (columnKey) {
+          sorters.push(new Sorter(columnKey, true));
+        }
+        this.byId("odataV2Table").getBinding("items").sort(sorters);
       },
     });
   },
