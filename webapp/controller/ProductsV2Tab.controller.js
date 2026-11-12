@@ -5,8 +5,18 @@ sap.ui.define(
     "sap/m/MessageBox",
     "sap/ui/core/library",
     "project1/util/ProductValidator",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
   ],
-  (BaseController, MessageToast, MessageBox, coreLibrary, ProductValidator) => {
+  (
+    BaseController,
+    MessageToast,
+    MessageBox,
+    coreLibrary,
+    ProductValidator,
+    Filter,
+    FilterOperator,
+  ) => {
     "use strict";
 
     const { ValueState } = coreLibrary;
@@ -14,6 +24,9 @@ sap.ui.define(
     const ODATA_MODEL = "odataV2";
     const DELETE_GROUP_ID = "deleteProducts";
 
+  
+
+  
     const TEXT_INPUT_IDS = ["v2InputName", "v2InputDesc"];
     const NUMBER_INPUT_IDS = ["v2InputId", "v2InputRating", "v2InputPrice"];
     const INTEGER_INPUT_IDS = ["v2InputId", "v2InputRating"];
@@ -89,6 +102,20 @@ sap.ui.define(
           Price: Number(this._getValue("v2InputPrice")).toFixed(2),
         };
       },
+      _applyProductFilter(query) {
+        const filters = [];
+        if (query) {
+          filters.push(
+            new Filter({
+              path: "Name",
+              operator: FilterOperator.Contains,
+              value1: query,
+              caseSensitive: false,
+            }),
+          );
+        }
+        this.byId("odataV2Table").getBinding("items").filter(filters);
+      },
 
       _setDialogMode(dialog, editPath) {
         this._editPath = editPath;
@@ -131,7 +158,6 @@ sap.ui.define(
       },
 
       async onCancelV2Product() {
-        // Inputs are not bound to the model, so closing discards any edits.
         this._resetDialog();
         this._editPath = null;
         (await this._loadDialog()).close();
@@ -233,6 +259,10 @@ sap.ui.define(
             showError(err);
           },
         });
+      },
+      onFilterV2Products(event) {
+        const query = (event.getParameter("value") ?? "").trim();
+        this._applyProductFilter(query);
       },
     });
   },
