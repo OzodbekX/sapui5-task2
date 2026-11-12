@@ -39,7 +39,6 @@ sap.ui.define(
     ];
 
     return BaseController.extend("project1.controller.ProductsV2Tab", {
-
       _getTexts() {
         const bundle = this.getResourceBundle();
         return {
@@ -144,7 +143,7 @@ sap.ui.define(
         if (this._oCtx) {
           model.deleteCreatedEntry(this._oCtx);
           this._oCtx = null;
-        }else if (this._editPath) {
+        } else if (this._editPath) {
           model.resetChanges([this._editPath], true);
         }
         this._editPath = null;
@@ -210,6 +209,7 @@ sap.ui.define(
           },
         });
       },
+
       onDeleteV2Products() {
         const table = this.byId("odataV2Table");
         const contexts = table.getSelectedContexts();
@@ -260,10 +260,12 @@ sap.ui.define(
           },
         });
       },
+
       onFilterV2Products(event) {
         const query = (event.getParameter("value") ?? "").trim();
         this._applyProductFilter(query);
       },
+
       onSortV2Products(event) {
         const selectedItem = event.getParameter("selectedItem");
         const columnKey = selectedItem.getKey();
