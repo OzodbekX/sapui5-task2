@@ -138,7 +138,11 @@
             </Column>
         </columns>
         <items>
-            <ColumnListItem id="v2ListItem">
+            <ColumnListItem
+                id="v2ListItem"
+                type="Navigation"
+                press=".onProductRowPress"
+            >
                 <cells>
                     <Text
                         id="v2CellId"
