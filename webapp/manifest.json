@@ -76,7 +76,7 @@
         "type": "sap.ui.model.odata.v2.ODataModel",
         "dataSource": "mainServiceV2",
         "preload": true,
-        "settings": {}
+        "settings": { "defaultBindingMode": "TwoWay" }
       },
       "odataV4": {
         "type": "sap.ui.model.odata.v4.ODataModel",
@@ -113,6 +113,11 @@
           "name": "RouteMain",
           "pattern": ":?query:",
           "target": ["TargetMain"]
+        },
+        {
+          "name":"RouteTab",
+          "pattern":"tab/{tabKey}",
+          "target":["TargetMain"]
         }
       ],
       "targets": {

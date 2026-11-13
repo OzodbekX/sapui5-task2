@@ -1,6 +1,7 @@
 <mvc:View
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    controllerName="project1.controller.Main"
 >
     <Page
         id="page"
@@ -11,6 +12,7 @@
                 id="mainIconTabBar"
                 expandable="false"
                 selectedKey="json"
+                select=".onTabSelect"
             >
                 <items>
                     <IconTabFilter

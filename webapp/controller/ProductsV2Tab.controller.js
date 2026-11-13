@@ -39,10 +39,6 @@ sap.ui.define(
     ];
 
     return BaseController.extend("project1.controller.ProductsV2Tab", {
-      _getValue(id) {
-        return this.byId(id).getValue().trim();
-      },
-
       _getTexts() {
         const bundle = this.getResourceBundle();
         return {
@@ -69,8 +65,6 @@ sap.ui.define(
         DIALOG_INPUT_IDS.forEach((id) => {
           const control = this.byId(id);
           if (control) {
-            control.setDateValue?.(null);
-            control.setValue("");
             control.setValueState(ValueState.None);
             control.setValueStateText("");
           }
@@ -89,18 +83,6 @@ sap.ui.define(
         });
       },
 
-      _readProduct() {
-        return {
-          ID: Number(this._getValue("v2InputId")),
-          Name: this._getValue("v2InputName"),
-          Description: this._getValue("v2InputDesc"),
-          ReleaseDate: this.byId(RELEASE_DATE_ID).getDateValue(),
-          DiscontinuedDate:
-            this.byId(DISCONTINUED_DATE_ID).getDateValue() || null,
-          Rating: Number(this._getValue("v2InputRating")),
-          Price: Number(this._getValue("v2InputPrice")).toFixed(2),
-        };
-      },
       _applyProductFilter(query) {
         const filters = [];
         if (query) {
@@ -126,24 +108,23 @@ sap.ui.define(
         );
       },
 
-      _fillDialog(product) {
-        this.byId("v2InputId").setValue(String(product.ID));
-        this.byId("v2InputName").setValue(product.Name);
-        this.byId("v2InputDesc").setValue(product.Description);
-        this.byId(RELEASE_DATE_ID).setDateValue(product.ReleaseDate || null);
-        // The mock server serializes a null DiscontinuedDate as /Date(0)/.
-        const discontinued = product.DiscontinuedDate;
-        this.byId(DISCONTINUED_DATE_ID).setDateValue(
-          discontinued && discontinued.getTime() !== 0 ? discontinued : null,
-        );
-        this.byId("v2InputRating").setValue(String(product.Rating ?? ""));
-        this.byId("v2InputPrice").setValue(String(product.Price ?? ""));
-      },
-
       async onAddV2Product() {
         const dialog = await this._loadDialog();
         this._resetDialog();
         this._setDialogMode(dialog, null);
+        const model = this.getModel(ODATA_MODEL);
+        this._oCtx = model.createEntry("/Products", {
+          properties: {
+            ID: null,
+            Name: "",
+            Description: "",
+            ReleaseDate: null,
+            DiscontinuedDate: null,
+            Rating: null,
+            Price: null,
+          },
+        });
+        dialog.setBindingContext(this._oCtx, ODATA_MODEL);
         dialog.open();
       },
 
@@ -152,14 +133,23 @@ sap.ui.define(
         const dialog = await this._loadDialog();
         this._resetDialog();
         this._setDialogMode(dialog, ctx.getPath());
-        this._fillDialog(ctx.getObject());
+        dialog.setBindingContext(ctx, ODATA_MODEL);
         dialog.open();
       },
 
       async onCancelV2Product() {
-        this._resetDialog();
+        const dialog = await this._loadDialog();
+        const model = this.getModel(ODATA_MODEL);
+        if (this._oCtx) {
+          model.deleteCreatedEntry(this._oCtx);
+          this._oCtx = null;
+        } else if (this._editPath) {
+          model.resetChanges([this._editPath], true);
+        }
         this._editPath = null;
-        (await this._loadDialog()).close();
+        dialog.setBindingContext(null, ODATA_MODEL);
+        this._resetDialog();
+        dialog.close();
       },
 
       onV2InputLiveChange(event) {
@@ -174,39 +164,50 @@ sap.ui.define(
         if (!this._validateDialog()) {
           return;
         }
-        const bundle = this.getResourceBundle();
-        const product = this._readProduct();
         const dialog = await this._loadDialog();
         if (dialog.getBusy()) {
           return;
         }
         const model = this.getModel(ODATA_MODEL);
+        if (!model.hasPendingChanges()) {
+          dialog.close();
+          return;
+        }
+
+        const bundle = this.getResourceBundle();
         const editPath = this._editPath;
-        const handlers = {
-          success: () => {
+        const showError = (err) =>
+          MessageBox.error(
+            bundle.getText(editPath ? "updateError" : "createError", [
+              this.getODataErrorText(err),
+            ]),
+          );
+
+        dialog.setBusy(true);
+        model.submitChanges({
+          success: (data) => {
             dialog.setBusy(false);
+            const failed = (data?.__batchResponses || []).filter(
+              (r) => r.response && Number(r.response.statusCode) >= 400,
+            );
+            if (failed.length) {
+              showError(failed[0].response);
+              return;
+            }
+            this._oCtx = null;
+            this._editPath = null;
+            dialog.setBindingContext(null, ODATA_MODEL);
             dialog.close();
             this._resetDialog();
-            this._editPath = null;
             MessageToast.show(
               bundle.getText(editPath ? "updateSuccess" : "createSuccess"),
             );
           },
           error: (err) => {
             dialog.setBusy(false);
-            MessageBox.error(
-              bundle.getText(editPath ? "updateError" : "createError", [
-                this.getODataErrorText(err),
-              ]),
-            );
+            showError(err);
           },
-        };
-        dialog.setBusy(true);
-        if (editPath) {
-          model.update(editPath, product, handlers);
-        } else {
-          model.create("/Products", product, handlers);
-        }
+        });
       },
 
       onDeleteV2Products() {
@@ -259,10 +260,12 @@ sap.ui.define(
           },
         });
       },
+
       onFilterV2Products(event) {
         const query = (event.getParameter("value") ?? "").trim();
         this._applyProductFilter(query);
       },
+
       onSortV2Products(event) {
         const selectedItem = event.getParameter("selectedItem");
         const columnKey = selectedItem.getKey();
