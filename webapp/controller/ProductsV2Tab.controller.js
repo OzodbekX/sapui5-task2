@@ -275,6 +275,13 @@ sap.ui.define(
         }
         this.byId("odataV2Table").getBinding("items").sort(sorters);
       },
+      onProductRowPress(event) {
+        const ctx = event.getSource().getBindingContext(ODATA_MODEL);
+        const productId = ctx.getProperty("ID");
+        this.getOwnerComponent()
+          .getRouter()
+          .navTo("RouteProduct", { ProductID: productId });
+      },
     });
   },
 );

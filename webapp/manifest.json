@@ -115,15 +115,24 @@
           "target": ["TargetMain"]
         },
         {
-          "name":"RouteTab",
-          "pattern":"tab/{tabKey}",
-          "target":["TargetMain"]
+          "name": "RouteTab",
+          "pattern": "tab/{tabKey}",
+          "target": ["TargetMain"]
+        },
+        {
+          "name": "RouteProduct",
+          "pattern": "Product/{ProductID}",
+          "target": ["TargetProduct"]
         }
       ],
       "targets": {
         "TargetMain": {
           "id": "Main",
           "name": "Main"
+        },
+        "TargetProduct": {
+          "id": "Product",
+          "name": "Product"
         }
       }
     },
