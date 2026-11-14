@@ -1,0 +1,33 @@
+[
+  {
+    "ID": 0,
+    "Name": "Exotic Liquids",
+    "Address": {
+      "Street": "NE 228th",
+      "City": "Sammamish",
+      "State": "WA",
+      "ZipCode": "98074",
+      "Country": "USA"
+    },
+    "Concurrency": 0,
+    "Products": [
+      { "__metadata": { "uri": "Products(0)" } }
+    ]
+  },
+  {
+    "ID": 1,
+    "Name": "Tokyo Traders",
+    "Address": {
+      "Street": "9-8 Sekimai Musashino-shi",
+      "City": "Tokyo",
+      "State": "Tokyo",
+      "ZipCode": "100",
+      "Country": "Japan"
+    },
+    "Concurrency": 0,
+    "Products": [
+      { "__metadata": { "uri": "Products(1)" } },
+      { "__metadata": { "uri": "Products(2)" } }
+    ]
+  }
+]

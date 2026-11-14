@@ -2,11 +2,217 @@
     controllerName="project1.controller.Product"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:uxap="sap.uxap"
+    xmlns:form="sap.ui.layout.form"
 >
-    <Page
-        id="productPage"
-        title="{i18n>productPageTitle}"
+    <uxap:ObjectPageLayout
+        id="productObjectPage"
+        upperCaseAnchorBar="false"
     >
-        <content />
-    </Page>
+        <uxap:headerTitle>
+            <uxap:ObjectPageDynamicHeaderTitle id="productHeaderTitle">
+                <uxap:expandedHeading>
+                    <Title
+                        id="productHeaderExpandedTitle"
+                        text="{odataV2>Name}"
+                    />
+                </uxap:expandedHeading>
+                <uxap:snappedHeading>
+                    <Title
+                        id="productHeaderSnappedTitle"
+                        text="{odataV2>Name}"
+                    />
+                </uxap:snappedHeading>
+            </uxap:ObjectPageDynamicHeaderTitle>
+        </uxap:headerTitle>
+
+        <uxap:sections>
+            <uxap:ObjectPageSection
+                id="productInfoSection"
+                titleUppercase="false"
+                title="{i18n>productInfoSectionTitle}"
+            >
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection
+                        id="productInfoSubSection"
+                        titleUppercase="false"
+                    >
+                        <uxap:blocks>
+                            <form:SimpleForm
+                                id="productSimpleForm"
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                            >
+                                <form:content>
+                                    <Label
+                                        id="prodLabelId"
+                                        text="{i18n>columnId}"
+                                    />
+                                    <Text
+                                        id="prodTextId"
+                                        text="{odataV2>ID}"
+                                    />
+                                    <Label
+                                        id="prodLabelName"
+                                        text="{i18n>columnProductName}"
+                                    />
+                                    <Text
+                                        id="prodTextName"
+                                        text="{odataV2>Name}"
+                                    />
+                                    <Label
+                                        id="prodLabelDesc"
+                                        text="{i18n>columnDescription}"
+                                    />
+                                    <Text
+                                        id="prodTextDesc"
+                                        text="{odataV2>Description}"
+                                    />
+                                    <Label
+                                        id="prodLabelRelDate"
+                                        text="{i18n>columnReleaseDate}"
+                                    />
+                                    <Text
+                                        id="prodTextRelDate"
+                                        text="{
+                                            path: 'odataV2>ReleaseDate',
+                                            type: 'sap.ui.model.type.Date',
+                                            formatOptions: {
+                                                style: 'medium'
+                                            }
+                                        }"
+                                    />
+                                    <Label
+                                        id="prodLabelDiscDate"
+                                        text="{i18n>columnDiscontinuedDate}"
+                                    />
+                                    <Text
+                                        id="prodTextDiscDate"
+                                        text="{
+                                            path: 'odataV2>DiscontinuedDate',
+                                            type: 'sap.ui.model.type.Date',
+                                            formatOptions: {
+                                                style: 'medium'
+                                            }
+                                        }"
+                                    />
+                                    <Label
+                                        id="prodLabelRating"
+                                        text="{i18n>columnRating}"
+                                    />
+                                    <Text
+                                        id="prodTextRating"
+                                        text="{odataV2>Rating}"
+                                    />
+                                    <Label
+                                        id="prodLabelPrice"
+                                        text="{i18n>columnPrice}"
+                                    />
+                                    <Text
+                                        id="prodTextPrice"
+                                        text="{
+                                            path: 'odataV2>Price',
+                                            type: 'sap.ui.model.type.Float',
+                                            formatOptions: {
+                                                minFractionDigits: 2,
+                                                maxFractionDigits: 2
+                                            }
+                                        }"
+                                    />
+                                </form:content>
+                            </form:SimpleForm>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection
+                id="supplierInfoSection"
+                titleUppercase="false"
+                title="{i18n>supplierInfoSectionTitle}"
+            >
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection
+                        id="supplierInfoSubSection"
+                        titleUppercase="false"
+                    >
+                        <uxap:blocks>
+                            <form:SimpleForm
+                                id="supplierSimpleForm"
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                            >
+                                <form:content>
+                                    <Label
+                                        id="suppLabelId"
+                                        text="{i18n>supplierId}"
+                                    />
+                                    <Text
+                                        id="suppTextId"
+                                        text="{odataV2>Supplier/ID}"
+                                    />
+                                    <Label
+                                        id="suppLabelName"
+                                        text="{i18n>supplierName}"
+                                    />
+                                    <Text
+                                        id="suppTextName"
+                                        text="{odataV2>Supplier/Name}"
+                                    />
+                                    <Label
+                                        id="suppLabelStreet"
+                                        text="{i18n>supplierStreet}"
+                                    />
+                                    <Text
+                                        id="suppTextStreet"
+                                        text="{odataV2>Supplier/Address/Street}"
+                                    />
+                                    <Label
+                                        id="suppLabelCity"
+                                        text="{i18n>supplierCity}"
+                                    />
+                                    <Text
+                                        id="suppTextCity"
+                                        text="{odataV2>Supplier/Address/City}"
+                                    />
+                                    <Label
+                                        id="suppLabelState"
+                                        text="{i18n>supplierState}"
+                                    />
+                                    <Text
+                                        id="suppTextState"
+                                        text="{odataV2>Supplier/Address/State}"
+                                    />
+                                    <Label
+                                        id="suppLabelZipCode"
+                                        text="{i18n>supplierZipCode}"
+                                    />
+                                    <Text
+                                        id="suppTextZipCode"
+                                        text="{odataV2>Supplier/Address/ZipCode}"
+                                    />
+                                    <Label
+                                        id="suppLabelCountry"
+                                        text="{i18n>supplierCountry}"
+                                    />
+                                    <Text
+                                        id="suppTextCountry"
+                                        text="{odataV2>Supplier/Address/Country}"
+                                    />
+                                    <Label
+                                        id="suppLabelConcurrency"
+                                        text="{i18n>supplierConcurrency}"
+                                    />
+                                    <Text
+                                        id="suppTextConcurrency"
+                                        text="{odataV2>Supplier/Concurrency}"
+                                    />
+                                </form:content>
+                            </form:SimpleForm>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
 </mvc:View>
