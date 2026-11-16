@@ -6,7 +6,8 @@
     "ReleaseDate": "1992-01-01T00:00:00Z",
     "DiscontinuedDate": null,
     "Rating": 4,
-    "Price": 2.5
+    "Price": 2.5,
+    "SupplierID": 0
   },
   {
     "ID": 1,
@@ -15,7 +16,8 @@
     "ReleaseDate": "1995-10-01T00:00:00Z",
     "DiscontinuedDate": null,
     "Rating": 3,
-    "Price": 3.5
+    "Price": 3.5,
+    "SupplierID": 1
   },
   {
     "ID": 2,
@@ -24,6 +26,7 @@
     "ReleaseDate": "2000-10-01T00:00:00Z",
     "DiscontinuedDate": null,
     "Rating": 3,
-    "Price": 20.9
+    "Price": 20.9,
+    "SupplierID": 1
   }
 ]
