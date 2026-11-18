@@ -10,12 +10,21 @@
         width="auto"
         growing="true"
         growingThreshold="20"
+        mode="MultiSelect"
     >
         <headerToolbar>
             <OverflowToolbar id="v4Toolbar">
                 <Title
                     id="v4Title"
                     text="{i18n>productsTableTitle}"
+                />
+                <ToolbarSpacer id="v4ToolbarSpacer" />
+                <Button
+                    id="v4DeleteButton"
+                    text="{i18n>deleteButtonText}"
+                    icon="sap-icon://delete"
+                    type="Reject"
+                    press=".onDeleteV4Products"
                 />
             </OverflowToolbar>
         </headerToolbar>
