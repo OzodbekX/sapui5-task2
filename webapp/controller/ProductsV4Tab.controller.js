@@ -15,15 +15,15 @@ sap.ui.define(
         const contexts = table.getSelectedContexts();
         const bundle = this.getResourceBundle();
         if (!contexts.length) {
-          MessageBox.show(bundle.getText("selectRecordToDelete"));
+          MessageToast.show(bundle.getText("selectRecordToDelete"));
           return;
         }
-        const detetePromises = contexts.map((ctx) =>
+        const deletePromises = contexts.map((ctx) =>
           ctx.delete(DELETE_GROUP_ID),
         );
         this.getModel(ODATA_MODEL).submitBatch(DELETE_GROUP_ID);
         try {
-          await Promise.all(detetePromises);
+          await Promise.all(deletePromises);
           table.removeSelections(true);
           MessageToast.show(bundle.getText("deleteSuccess", [contexts.length]));
         } catch (err) {
