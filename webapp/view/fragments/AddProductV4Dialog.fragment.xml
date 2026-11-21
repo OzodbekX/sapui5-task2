@@ -5,7 +5,7 @@
 >
     <Dialog
         id="addProductV4Dialog"
-        title="{i18n>addProductDialogTitle}"
+        title="{=${v4Dialog/isEdit}?${i18n>editProductDialogTitle}:${i18n>addProductDialogTitle}}"
         contentWidth="35rem"
     >
         <content>
@@ -22,6 +22,7 @@
                 <Input
                     id="v4InputId"
                     type="Number"
+                    editable="{= !${v4Dialog>/isEdit} }"
                     required="true"
                     value="{path:'odataV4>ID', type:'sap.ui.model.odata.type.Int32'}"
                     liveChange=".onV4InputLiveChange"

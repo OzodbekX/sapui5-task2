@@ -83,6 +83,12 @@
                     text="{i18n>columnPrice}"
                 />
             </Column>
+            <Column id="v4ColActions" hAlign="End">
+                <Text
+                    id="v4ColActionsText"
+                    text="{i18n>columnActions}"
+                />
+            </Column>
         </columns>
         <items>
             <ColumnListItem id="v4ListItem">
@@ -133,6 +139,12 @@
                                 maxFractionDigits: 2
                             }
                         }"
+                    />
+                    <Button
+                        id="v4CellEditButton"
+                        text="{i18n>editButton}"
+                        icon="sap-icon://edit"
+                        press=".onEditV4Product"
                     />
                 </cells>
             </ColumnListItem>

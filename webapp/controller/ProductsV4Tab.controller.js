@@ -6,6 +6,7 @@ sap.ui.define(
     "sap/ui/core/library",
     "sap/ui/core/Messaging",
     "project1/util/ProductValidator",
+    "sap/ui/model/json/JSONModel",
   ],
   (
     BaseController,
@@ -14,6 +15,7 @@ sap.ui.define(
     coreLibrary,
     Messaging,
     ProductValidator,
+    JSONModel,
   ) => {
     "use strict";
     const { ValueState, MessageType } = coreLibrary;
@@ -80,9 +82,51 @@ sap.ui.define(
           .filter((msg) => msg.getType() === MessageType.Error);
         return errors.length ? errors[errors.length - 1].getMessage() : "";
       },
+      async _updateV4Product(dialog) {
+        const model = this.getModel(ODATA_MODEL);
+        const bundle = this.getResourceBundle();
+        const close = () => {
+          dialog.setBindingContext(null, ODATA_MODEL);
+          this._resetDialog();
+          dialog.close();
+        };
+        if (!model.hasPendingChanges(CREATE_GROUP_ID)) {
+          close();
+          return;
+        }
+        const binding = this.byId("odataV4Table").getBinding("items");
+        const patchCompleted = new Promise((resolve) => {
+          binding.attachEventOnce("patchCompleted", (event) =>
+            resolve(event.getParameter("success")),
+          );
+        });
+        Messaging.removeAllMessages();
+        dialog.setBusy(true);
+        try {
+          model.submitBatch(CREATE_GROUP_ID);
+          const success = await patchCompleted;
+          if (!success) {
+            MessageBox.error(
+              bundle.getText("updateError", [this._getLastBackendError()]),
+            );
+            return;
+          }
+          close();
+          MessageToast.show(bundle.getText("updateSuccess"));
+        } catch (err) {
+          MessageBox.error(bundle.getText("updateError", [err.message]));
+        } finally {
+          dialog.setBusy(false);
+        }
+      },
+      onInit() {
+        this.setModel(new JSONModel({ isEdit: false }), "v4Dialog");
+      },
       async onAddV4Product() {
         const dialog = await this._loadDialog();
         this._resetDialog();
+        this._isEdit = false;
+        this.getModel("v4Dialog").setProperty("/isEdit", false);
         const binding = this.byId("odataV4Table").getBinding("items");
         this._oCtx = binding.create({
           ID: null,
@@ -98,9 +142,20 @@ sap.ui.define(
         dialog.setBindingContext(this._oCtx, ODATA_MODEL);
         dialog.open();
       },
+      async onEditV4Product(event) {
+        const ctx = event.getSource().getBindingContext(ODATA_MODEL);
+        const dialog = await this._loadDialog();
+        this._resetDialog();
+        this._isEdit = true;
+        this.getModel("v4Dialog").setProperty("/isEdit", true);
+        dialog.setBindingContext(ctx, ODATA_MODEL);
+        dialog.open();
+      },
       async onCancelV4Product() {
         const dialog = await this._loadDialog();
-        if (this._oCtx) {
+        if (this._isEdit) {
+          this.getModel(ODATA_MODEL).resetChanges(CREATE_GROUP_ID);
+        } else if (this._oCtx) {
           this._oCtx.delete();
           this._oCtx = null;
         }
@@ -119,8 +174,13 @@ sap.ui.define(
         if (!this._validateDialog()) {
           return;
         }
+
         const dialog = await this._loadDialog();
         if (dialog.getBusy()) {
+          return;
+        }
+        if (this._isEdit) {
+          await this._updateV4Product(dialog);
           return;
         }
         const model = this.getModel(ODATA_MODEL);
