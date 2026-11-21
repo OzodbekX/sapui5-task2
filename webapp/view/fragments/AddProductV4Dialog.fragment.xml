@@ -1,0 +1,123 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+>
+    <Dialog
+        id="addProductV4Dialog"
+        title="{=${v4Dialog/isEdit}?${i18n>editProductDialogTitle}:${i18n>addProductDialogTitle}}"
+        contentWidth="35rem"
+    >
+        <content>
+            <f:SimpleForm
+                id="addProductV4Form"
+                editable="true"
+                layout="ResponsiveGridLayout"
+            >
+                <Label
+                    id="v4InputIdLabel"
+                    text="{i18n>columnId}"
+                    labelFor="v4InputId"
+                />
+                <Input
+                    id="v4InputId"
+                    type="Number"
+                    editable="{= !${v4Dialog>/isEdit} }"
+                    required="true"
+                    value="{path:'odataV4>ID', type:'sap.ui.model.odata.type.Int32'}"
+                    liveChange=".onV4InputLiveChange"
+                />
+
+                <Label
+                    id="v4InputNameLabel"
+                    text="{i18n>columnProductName}"
+                    labelFor="v4InputName"
+                />
+                <Input
+                    id="v4InputName"
+                    required="true"
+                    value="{odataV4>Name}"
+                    liveChange=".onV4InputLiveChange"
+                />
+
+                <Label
+                    id="v4InputDescLabel"
+                    text="{i18n>columnDescription}"
+                    labelFor="v4InputDesc"
+                />
+                <Input
+                    id="v4InputDesc"
+                    required="true"
+                    value="{odataV4>Description}"
+                    liveChange=".onV4InputLiveChange"
+                />
+
+                <Label
+                    id="v4InputRelDateLabel"
+                    text="{i18n>columnReleaseDate}"
+                    labelFor="v4InputRelDate"
+                />
+                <DatePicker
+                    id="v4InputRelDate"
+                    required="true"
+                    change=".onV4DateChange"
+                    value="{path:'odataV4>ReleaseDate', type:'sap.ui.model.odata.type.DateTimeOffset', formatOptions:{style:'medium'}}"
+                />
+
+                <Label
+                    id="v4InputDiscDateLabel"
+                    text="{i18n>columnDiscontinuedDate}"
+                    labelFor="v4InputDiscDate"
+                />
+                <DatePicker
+                    id="v4InputDiscDate"
+                    change=".onV4DateChange"
+                    value="{path:'odataV4>DiscontinuedDate', type:'sap.ui.model.odata.type.DateTimeOffset', formatOptions:{style:'medium'}}"
+                />
+
+                <Label
+                    id="v4InputRatingLabel"
+                    text="{i18n>columnRating}"
+                    labelFor="v4InputRating"
+                />
+                <Input
+                    id="v4InputRating"
+                    type="Number"
+                    required="true"
+                    liveChange=".onV4InputLiveChange"
+                    value="{path:'odataV4>Rating', type:'sap.ui.model.odata.type.Int16'}"
+                />
+
+                <Label
+                    id="v4InputPriceLabel"
+                    text="{i18n>columnPrice}"
+                    labelFor="v4InputPrice"
+                />
+                <Input
+                    id="v4InputPrice"
+                    type="Number"
+                    required="true"
+                    liveChange=".onV4InputLiveChange"
+                    value="{path:'odataV4>Price', type:'sap.ui.model.odata.type.Double'}"
+                />
+            </f:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button
+                id="saveV4ProductButton"
+                text="{i18n>saveButton}"
+                type="Emphasized"
+                press=".onSaveV4Product"
+            />
+        </beginButton>
+
+        <endButton>
+            <Button
+                id="cancelV4ProductButton"
+                text="{i18n>cancelButton}"
+                press=".onCancelV4Product"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
