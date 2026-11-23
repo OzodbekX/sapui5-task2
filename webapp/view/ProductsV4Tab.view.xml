@@ -5,7 +5,12 @@
 >
     <Table
         id="odataV4Table"
-        items="{odataV4>/Products}"
+        items="{
+            path: 'odataV4>/Products',
+            parameters: {
+                $$updateGroupId: 'createProductV4'
+            }
+        }"
         class="sapUiResponsiveMargin"
         width="auto"
         growing="true"
@@ -19,6 +24,13 @@
                     text="{i18n>productsTableTitle}"
                 />
                 <ToolbarSpacer id="v4ToolbarSpacer" />
+                <Button
+                    id="v4AddButton"
+                    text="{i18n>addRecord}"
+                    icon="sap-icon://add"
+                    type="Emphasized"
+                    press=".onAddV4Product"
+                />
                 <Button
                     id="v4DeleteButton"
                     text="{i18n>deleteButtonText}"
