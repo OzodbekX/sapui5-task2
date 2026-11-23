@@ -5,7 +5,7 @@
 >
     <Dialog
         id="addProductV4Dialog"
-        title="{=${v4Dialog/isEdit}?${i18n>editProductDialogTitle}:${i18n>addProductDialogTitle}}"
+        title="{=${v4Dialog>/isEdit}?${i18n>editProductDialogTitle}:${i18n>addProductDialogTitle}}"
         contentWidth="35rem"
     >
         <content>
