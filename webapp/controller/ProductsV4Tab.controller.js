@@ -122,10 +122,12 @@ sap.ui.define(
       onInit() {
         this.setModel(new JSONModel({ isEdit: false }), "v4Dialog");
       },
+      _isEditMode() {
+        return this.getModel("v4Dialog").getProperty("/isEdit");
+      },
       async onAddV4Product() {
         const dialog = await this._loadDialog();
         this._resetDialog();
-        this._isEdit = false;
         this.getModel("v4Dialog").setProperty("/isEdit", false);
         const binding = this.byId("odataV4Table").getBinding("items");
         this._oCtx = binding.create({
@@ -146,14 +148,13 @@ sap.ui.define(
         const ctx = event.getSource().getBindingContext(ODATA_MODEL);
         const dialog = await this._loadDialog();
         this._resetDialog();
-        this._isEdit = true;
         this.getModel("v4Dialog").setProperty("/isEdit", true);
         dialog.setBindingContext(ctx, ODATA_MODEL);
         dialog.open();
       },
       async onCancelV4Product() {
         const dialog = await this._loadDialog();
-        if (this._isEdit) {
+        if (this._isEditMode()) {
           this.getModel(ODATA_MODEL).resetChanges(CREATE_GROUP_ID);
         } else if (this._oCtx) {
           this._oCtx.delete();
@@ -179,7 +180,7 @@ sap.ui.define(
         if (dialog.getBusy()) {
           return;
         }
-        if (this._isEdit) {
+        if (this._isEditMode()) {
           await this._updateV4Product(dialog);
           return;
         }
@@ -187,7 +188,6 @@ sap.ui.define(
         const bundle = this.getResourceBundle();
         const binding = this.byId("odataV4Table").getBinding("items");
 
-        // fires when the backend has answered the POST: success = true / false
         const createCompleted = new Promise((resolve) => {
           binding.attachEventOnce("createCompleted", (event) =>
             resolve(event.getParameter("success")),
